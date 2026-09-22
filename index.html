@@ -1,0 +1,3634 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>信榮營造｜人事管理系統</title>
+<style>
+  :root{ color-scheme:light; }
+  html{ -webkit-text-size-adjust:100%; }
+  body{ margin:0; }
+  img{ max-width:100%; }
+</style>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --paper:#f3f6fa;
+    --surface:#ffffff;
+    --surface-2:#eef2f7;
+    --line:#dbe3ec;
+    --ink:#182230;
+    --ink-soft:#56677c;
+    --ink-faint:#8494a6;
+    --accent:#2b5a96;
+    --accent-strong:#1d436f;
+    --accent-soft:#e3ecf6;
+
+    /* 證照管理「以顏色圖塊區隔每個人」：3色循環（與到期狀態的紅／橙／黃／綠完全區隔，避免混淆），
+       沿用 --accent（藍）做第1色，另補上水綠、紫兩色。 */
+    --p2:#1baf7a;
+    --p2-bg:#e0f5ec;
+    --p3:#4a3aa7;
+    --p3-bg:#ebe8fa;
+
+    /* 人力分配「外掛人員」圖塊色：紫紅色，與上方 3 色（藍／水綠／紫）及到期狀態紅／橙／黃／綠皆不同色相，
+       避免混淆——外掛人員為固定單一色（狀態標記），非依人輪替的識別色。 */
+    --ext:#e87ba4;
+    --ext-bg:#fbe8f0;
+
+    --red:#a4291f;
+    --red-bg:#fbe8e6;
+    --red-line:#eec3bd;
+    --orange:#b5540d;
+    --orange-bg:#fbe4cd;
+    --orange-line:#eec69a;
+    --amber:#8a5c07;
+    --amber-bg:#fbf0d4;
+    --amber-line:#edd696;
+    --green:#186b45;
+    --green-bg:#e1f2e8;
+    --green-line:#b7ddc4;
+
+    --shadow: 0 1px 2px rgba(20,30,45,.06), 0 8px 24px -12px rgba(20,30,45,.18);
+    --radius: 10px;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#10151d;
+      --surface:#171e28;
+      --surface-2:#1d2530;
+      --line:#2b3543;
+      --ink:#e8edf3;
+      --ink-soft:#9aabbd;
+      --ink-faint:#6c7c8f;
+      --accent:#75a8e3;
+      --accent-strong:#9cc2ee;
+      --accent-soft:#1f3350;
+
+      --p2:#199e70;
+      --p2-bg:#14291f;
+      --p3:#9085e9;
+      --p3-bg:#241f42;
+
+      --ext:#d55181;
+      --ext-bg:#33202b;
+
+      --red:#ff9a8f;
+      --red-bg:#3a1f1c;
+      --red-line:#5c2e29;
+      --orange:#ffab5c;
+      --orange-bg:#3b2711;
+      --orange-line:#5e401c;
+      --amber:#f0c766;
+      --amber-bg:#382c12;
+      --amber-line:#57461d;
+      --green:#86dcae;
+      --green-bg:#153a26;
+      --green-line:#255a3b;
+
+      --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#10151d;
+    --surface:#171e28;
+    --surface-2:#1d2530;
+    --line:#2b3543;
+    --ink:#e8edf3;
+    --ink-soft:#9aabbd;
+    --ink-faint:#6c7c8f;
+    --accent:#75a8e3;
+    --accent-strong:#9cc2ee;
+    --accent-soft:#1f3350;
+
+    --p2:#199e70;
+    --p2-bg:#14291f;
+    --p3:#9085e9;
+    --p3-bg:#241f42;
+
+    --ext:#d55181;
+    --ext-bg:#33202b;
+
+    --red:#ff9a8f;
+    --red-bg:#3a1f1c;
+    --red-line:#5c2e29;
+    --orange:#ffab5c;
+    --orange-bg:#3b2711;
+    --orange-line:#5e401c;
+    --amber:#f0c766;
+    --amber-bg:#382c12;
+    --amber-line:#57461d;
+    --green:#86dcae;
+    --green-bg:#153a26;
+    --green-line:#255a3b;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;} /* guards against .field/.field-row etc. setting their own display */
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    font-size:19.5px;
+    line-height:1.55;
+    padding-inline:24px;
+    padding-block:28px 64px;
+  }
+  .wrap{max-width:none;width:100%;margin-inline:auto;display:flex;flex-direction:column;gap:24px;}
+
+  .num{font-family:'IBM Plex Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums;}
+
+  /* header */
+  header.top{
+    display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
+    background:linear-gradient(135deg, var(--accent-soft), var(--surface) 65%);
+    border:1px solid var(--line);border-radius:14px;
+    padding:24px 28px;box-shadow:var(--shadow);
+  }
+  .brand{display:flex;align-items:center;gap:16px;}
+  .brand-logo{width:56px;height:auto;flex:none;filter:drop-shadow(0 2px 4px rgba(20,30,45,.15));}
+  header.top h1{
+    font-family:'Noto Serif TC', serif;
+    font-weight:900;
+    font-size:clamp(31px,4.4vw,43.5px);
+    line-height:1.25;
+    margin:0;
+    letter-spacing:.02em;
+    text-wrap:balance;
+  }
+  header.top h1 .brand-name{
+    background:linear-gradient(120deg, #1d436f 0%, #2b5a96 42%, #6f9fd8 68%, #2b5a96 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 2px 10px rgba(29,67,111,.22);
+    letter-spacing:.05em;
+  }
+  header.top h1 .brand-divider{
+    color:var(--accent);opacity:.4;font-weight:300;margin:0 7px;
+  }
+  header.top h1 .brand-suffix{
+    color:var(--ink-soft);font-weight:600;letter-spacing:.1em;font-size:.8em;
+  }
+  header.top p{margin:0;color:var(--ink-soft);font-size:18.5px;line-height:1.5;}
+  .today-chip{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--surface);border:1px solid var(--accent-soft);border-radius:999px;
+    padding:8px 15px;font-size:16.5px;color:var(--ink-soft);box-shadow:var(--shadow);white-space:nowrap;
+  }
+  .today-chip b{color:var(--ink);font-family:'IBM Plex Mono',monospace;font-weight:600;}
+
+  /* summary tiles */
+  .tiles-group{display:flex;flex-direction:column;gap:10px;}
+  .tiles-group-label{font-size:20px;font-weight:800;color:var(--ink);text-transform:uppercase;letter-spacing:.03em;padding-inline:2px;}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,220px));gap:12px;}
+  .tile{
+    text-align:left;cursor:pointer;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 16px 14px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;gap:6px;
+    font:inherit;color:inherit;
+    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  .tile:hover{transform:translateY(-1px);}
+  .tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .tile[data-active="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft), var(--shadow);}
+  .tile .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+  .tile .label{display:flex;align-items:center;gap:7px;font-size:16.5px;color:var(--ink-soft);font-weight:600;}
+  .tile .count{font-size:39px;font-weight:600;line-height:1;}
+  .tile.all{background:var(--accent-soft);}
+  .tile.red{background:var(--red-bg);}
+  .tile.orange{background:var(--orange-bg);}
+  .tile.yellow{background:var(--amber-bg);}
+  .tile.green{background:var(--green-bg);}
+  .tile.exempt{background:var(--surface-2);}
+  .tile.all .dot{background:var(--accent);}
+  .tile.red .dot{background:var(--red);}
+  .tile.orange .dot{background:var(--orange);}
+  .tile.yellow .dot{background:var(--amber);}
+  .tile.green .dot{background:var(--green);}
+  .tile.exempt .dot{background:var(--ink-faint);}
+  .tile.all .label{color:var(--accent-strong);}
+  .tile.red .label{color:var(--red);}
+  .tile.orange .label{color:var(--orange);}
+  .tile.yellow .label{color:var(--amber);}
+  .tile.green .label{color:var(--green);}
+  .tile.red .count{color:var(--red);}
+  .tile.orange .count{color:var(--orange);}
+  .tile.yellow .count{color:var(--amber);}
+  .tile.green .count{color:var(--green);}
+  .tile.exempt .count{color:var(--ink-soft);}
+
+  .legend{font-size:16px;color:var(--ink-faint);display:flex;gap:16px;flex-wrap:wrap;padding-inline:2px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend i{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .legend .r{background:var(--red);} .legend .o{background:var(--orange);} .legend .y{background:var(--amber);} .legend .g{background:var(--green);} .legend .e{background:var(--ink-faint);}
+
+  /* banner */
+  .banner{
+    border:1px solid var(--amber-line);background:var(--amber-bg);color:var(--amber);
+    border-radius:var(--radius);padding:10px 14px;font-size:15.5px;display:flex;gap:8px;align-items:flex-start;
+  }
+  .banner b{color:inherit;}
+
+  /* toolbar */
+  .toolbar{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:10px;box-shadow:var(--shadow);
+  }
+  .toolbar input[type="search"], .toolbar select{
+    font:inherit;font-size:18px;line-height:1.3;color:var(--ink);
+    background:var(--surface-2);border:1px solid var(--line);border-radius:7px;
+    padding:9px 12px;
+  }
+  .toolbar input[type="search"]{flex:1 1 220px;min-width:0;max-width:420px;}
+  .toolbar select{flex:0 0 auto;}
+  .spacer{flex:1;}
+  .btn{
+    font:inherit;font-size:18px;line-height:1.2;font-weight:600;cursor:pointer;border-radius:7px;
+    padding:9px 15px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);
+    display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+  }
+  .btn:hover{filter:brightness(0.98);}
+  .btn:focus-visible, select:focus-visible, input:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .btn.primary:hover{background:var(--accent-strong);}
+  .btn.ghost{background:transparent;}
+  .btn.small{padding:6px 10px;font-size:16px;}
+  .btn.danger-arm{background:var(--red-bg);border-color:var(--red-line);color:var(--red);}
+  a.btn{text-decoration:none;}
+  .doc-downloads{display:flex;flex-wrap:wrap;gap:10px;}
+  .doc-downloads .doc-hint{font-size:14px;color:var(--ink-faint);width:100%;margin-top:-2px;}
+
+  /* table */
+  .table-wrap{
+    background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:var(--radius);
+    overflow-x:auto;box-shadow:var(--shadow);
+  }
+  .pagination{
+    display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding-top:4px;
+  }
+  .pagination:empty{display:none;}
+  .pagination .page-info{font-size:15.5px;color:var(--ink-soft);white-space:nowrap;}
+  .pagination .btn.small[disabled]{opacity:.45;cursor:not-allowed;}
+  table{width:100%;border-collapse:collapse;min-width:1360px;}
+  thead th{
+    position:sticky;top:0;background:var(--accent-soft);z-index:1;
+    text-align:left;font-size:16px;color:var(--accent-strong);font-weight:600;
+    text-transform:uppercase;letter-spacing:.04em;
+    padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  thead th button{
+    all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:inherit;font:inherit;
+    text-transform:inherit;letter-spacing:inherit;
+  }
+  thead th button:hover{color:var(--ink);}
+  thead th .arrow{font-size:11.5px;opacity:.7;}
+  tbody td{padding:13px 14px;border-bottom:1px solid var(--line);font-size:19px;vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr{border-left:4px solid transparent;}
+  tbody tr.s-red{border-left-color:var(--red);}
+  tbody tr.s-orange{border-left-color:var(--orange);}
+  tbody tr.s-yellow{border-left-color:var(--amber);}
+  tbody tr.s-green{border-left-color:var(--green);}
+  tbody tr.s-exempt{border-left-color:var(--ink-faint);}
+  tbody tr:hover{background:var(--surface-2);}
+  #personnelTbody tr.row-inactive{background:var(--surface-2);filter:grayscale(55%);opacity:.62;}
+  #personnelTbody tr.row-inactive:hover{opacity:.85;}
+  /* 留職停薪：仍屬在職人員，僅以淡黃底色標示，不套用離職的灰階／透明度效果。 */
+  #personnelTbody tr.row-leave{background:var(--amber-bg);}
+  .name-cell b{display:block;font-weight:600;}
+  .name-cell span{display:block;color:var(--ink-faint);font-size:16px;}
+  /* 主管職稱圖塊：總經理／副總經理／協理／襄理／經理 各給不同底色區塊，方便一眼辨識層級。
+     此規則不綁定特定容器（員工管理表格、人力分配卡片皆會用到），色相規則見下方 .tb-* */
+  .title-badge{
+    display:inline-block;margin-top:2px;border-radius:6px;padding:1px 8px;
+    font-size:14px;font-weight:700;line-height:1.4;
+  }
+  .title-badge.tb-gm{color:var(--p3);background:var(--p3-bg);}
+  .title-badge.tb-vgm{color:var(--accent-strong);background:var(--accent-soft);}
+  .title-badge.tb-ad{color:var(--p2);background:var(--p2-bg);}
+  .title-badge.tb-am{color:var(--red);background:var(--red-bg);}
+  .title-badge.tb-mgr{color:var(--orange);background:var(--orange-bg);}
+  .name-cell .group-count{
+    display:inline-block;margin-top:3px;color:var(--accent-strong);background:var(--accent-soft);
+    border-radius:999px;padding:1px 8px;font-size:13px;font-weight:600;
+  }
+  .name-cell button.group-count{border:none;cursor:pointer;font:inherit;font-weight:600;}
+  .name-cell button.group-count:hover{background:var(--accent);color:#fff;}
+  /* 點選證照名稱，篩選出所有同證照類別的紀錄（沿用搜尋欄位，與點選人員的「X 張證照」篩選同一種互動模式）。 */
+  .cert-type-link{all:unset;cursor:pointer;color:inherit;font:inherit;text-align:left;display:inline;}
+  .cert-type-link:hover{color:var(--accent-strong);text-decoration:underline;}
+  .cert-type-link:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-radius:2px;}
+  /* 以「線條外框」區隔每個人（不使用底色色塊）：每人固定套用同一色線，依出現順序在 3 色間循環
+     （藍／水綠／紫——刻意與到期狀態燈號的紅／橙／黃／綠完全區隔，避免混淆）。
+     整組列以外框線（頂／底／左／右）框起，不填色，每列仍各自完整呈現姓名等欄位（不合併儲存格），
+     維持逐列可編輯、排序的簡單結構。 */
+  .cert-c1{--block-color:var(--accent);}
+  .cert-c2{--block-color:var(--p2);}
+  .cert-c3{--block-color:var(--p3);}
+  tbody tr.cert-block:hover td{background:var(--surface-2);}
+  tbody tr.cert-block td:first-child{border-left:2px solid var(--block-color);}
+  tbody tr.cert-block td:last-child{border-right:2px solid var(--block-color);}
+  tbody tr.cert-block-start td{border-top:2px solid var(--block-color);}
+  tbody tr.cert-block-start td:first-child{border-top-left-radius:10px;}
+  tbody tr.cert-block-start td:last-child{border-top-right-radius:10px;}
+  tbody tr.cert-block-end td{border-bottom:2px solid var(--block-color);}
+  tbody tr.cert-block-end td:first-child{border-bottom-left-radius:10px;}
+  tbody tr.cert-block-end td:last-child{border-bottom-right-radius:10px;}
+  tbody tr.cert-block-end:last-child td{border-bottom:2px solid var(--block-color);}
+
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 11px 5px 9px;
+    font-size:16px;line-height:1.2;font-weight:600;white-space:nowrap;
+  }
+  .pill i{width:7px;height:7px;border-radius:50%;display:inline-block;}
+  .pill.red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-line);}
+  .pill.orange{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-line);}
+  .pill.yellow{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-line);}
+  .pill.green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-line);}
+  .pill.exempt{background:var(--surface-2);color:var(--ink-soft);border:1px solid var(--line);}
+  .pill.red i{background:var(--red);} .pill.orange i{background:var(--orange);} .pill.yellow i{background:var(--amber);} .pill.green i{background:var(--green);} .pill.exempt i{background:var(--ink-faint);}
+  /* 點選「狀態」欄位的燈號徽章，篩選出所有同狀態的紀錄（與上方燈號圖塊篩選同一套邏輯，再點一次取消篩選）。 */
+  .pill.status-filter-btn{cursor:pointer;font:inherit;-webkit-appearance:none;appearance:none;}
+  .pill.status-filter-btn:hover{filter:brightness(0.95);}
+  .pill.status-filter-btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .row-actions{display:flex;gap:6px;justify-content:flex-end;}
+  .notes-cell{max-width:240px;white-space:normal;word-break:break-word;font-size:17px;color:var(--ink-soft);}
+  .muted{color:var(--ink-faint);}
+  .empty-state{padding:48px 20px;text-align:center;color:var(--ink-faint);font-size:18px;}
+  .skeleton-row td{padding:13px 14px;}
+  .skeleton-bar{height:14px;border-radius:5px;background:linear-gradient(90deg,var(--surface-2),var(--line),var(--surface-2));background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite;}
+  @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+  @media (prefers-reduced-motion:reduce){.skeleton-bar{animation:none;}}
+
+  footer.foot{font-size:15.5px;color:var(--ink-faint);text-align:center;padding-top:6px;}
+
+  /* modal */
+  .overlay{
+    position:fixed;inset:0;background:rgba(10,16,24,.5);
+    display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;
+  }
+  .overlay[hidden]{display:none;}
+  .modal{
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    width:100%;max-width:520px;max-height:90vh;overflow-y:auto;
+    box-shadow:0 20px 60px -20px rgba(10,16,24,.45);
+  }
+  .modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 6px;}
+  .modal-head h2{font-family:'Noto Serif TC',serif;font-size:24px;margin:0;font-weight:700;color:var(--accent-strong);}
+  .modal-body{padding:6px 20px 20px;display:flex;flex-direction:column;gap:14px;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:16px;font-weight:600;color:var(--ink-soft);}
+  .field-section-title{
+    font-size:14.5px;font-weight:700;color:var(--accent-strong);text-transform:uppercase;letter-spacing:.05em;
+    margin-top:8px;padding-top:12px;border-top:1px solid var(--line);
+  }
+  .field-section-title:first-child{margin-top:0;padding-top:0;border-top:none;}
+  .field .req{color:var(--red);}
+  .field input, .field textarea{
+    font:inherit;font-size:18px;line-height:1.35;color:var(--ink);background:var(--surface-2);
+    border:1px solid var(--line);border-radius:7px;padding:9px 11px;width:100%;
+  }
+  .field textarea{resize:vertical;min-height:56px;}
+  .field-row{display:flex;gap:12px;}
+  .field-row .field{flex:1;min-width:0;}
+  .roc-date-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .roc-date-row input{width:74px;text-align:center;flex:none;}
+  .roc-date-row input:first-child{width:80px;}
+  .roc-date-row span{font-size:16.5px;color:var(--ink-soft);}
+  .modal-foot{display:flex;justify-content:flex-end;gap:8px;padding:4px 20px 20px;}
+  .form-error{
+    background:var(--red-bg);border:1px solid var(--red-line);color:var(--red);
+    border-radius:7px;padding:8px 12px;font-size:16.5px;
+  }
+  .icon-x{border:none;background:none;cursor:pointer;color:var(--ink-faint);font-size:20.5px;line-height:1;padding:4px;border-radius:6px;}
+
+  #personnelCertRows{display:flex;flex-direction:column;gap:10px;}
+  .pcert-row{
+    background:var(--surface-2);border:1px solid var(--line);border-radius:9px;
+    padding:12px;display:flex;flex-direction:column;gap:10px;
+  }
+  .pcert-row-head{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .pcert-row-head b{font-size:15px;font-weight:700;color:var(--ink-soft);}
+  .icon-x:hover{background:var(--surface-2);color:var(--ink);}
+
+  @media (max-width:520px){
+    .field-row{flex-direction:column;}
+    header.top{align-items:flex-start;}
+  }
+
+  .contact-cell{font-size:17px;line-height:1.45;}
+  .contact-cell span{display:block;color:var(--ink-faint);font-size:15.5px;}
+  .addr-cell{max-width:220px;white-space:normal;word-break:break-word;font-size:17px;color:var(--ink-soft);}
+
+  /* app shell: sidebar + main content */
+  .app-shell{display:flex;gap:20px;align-items:flex-start;}
+  .sidebar{
+    flex:0 0 260px;display:flex;flex-direction:column;gap:2px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:10px;box-shadow:var(--shadow);position:sticky;top:20px;
+  }
+  .nav-item{
+    all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;
+    width:100%;padding:10px 12px;border-radius:7px;font-size:18px;font-weight:600;color:var(--ink-soft);
+  }
+  .nav-item:hover{background:var(--surface-2);color:var(--ink);}
+  .nav-item:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .nav-item[aria-current="page"]{background:var(--accent-soft);color:var(--accent-strong);}
+  .nav-item .emoji{font-size:19.5px;width:20px;text-align:center;flex:none;}
+  .nav-item .nav-label{flex:1;text-align:left;}
+  .nav-item .soon-badge{
+    font-size:12px;font-weight:600;color:var(--ink-faint);background:var(--surface-2);
+    border:1px solid var(--line);border-radius:999px;padding:2px 7px;white-space:nowrap;
+  }
+  .main-content{flex:1;min-width:0;display:flex;flex-direction:column;gap:24px;}
+
+  /* home dashboard */
+  .home-hero h2{font-family:'Noto Serif TC',serif;font-size:26.5px;margin:0 0 4px;color:var(--accent-strong);font-weight:700;}
+  .home-hero p{margin:0;color:var(--ink-soft);}
+
+  #panel-home{display:flex;flex-direction:column;gap:30px;}
+  .module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;}
+  .module-card{
+    all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:6px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:15px 16px;box-shadow:var(--shadow);
+  }
+  .module-card:hover{border-color:var(--accent);}
+  .module-card:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+  .module-card .mc-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .module-card .mc-title{font-size:18.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px;}
+  .module-card .mc-desc{font-size:15.5px;color:var(--ink-soft);line-height:1.5;}
+  .module-card .mc-badge{font-size:12.5px;font-weight:600;border-radius:999px;padding:3px 9px;white-space:nowrap;}
+  .module-card .mc-badge.live{background:var(--green-bg);color:var(--green);border:1px solid var(--green-line);}
+  .module-card .mc-badge.soon{background:var(--surface-2);color:var(--ink-faint);border:1px solid var(--line);}
+
+  /* 首頁：主欄（統計／文件／功能）＋ 右側欄（公司公告／本月壽星）雙欄版面，窄螢幕自動改為單欄堆疊。 */
+  .home-grid{display:grid;grid-template-columns:1fr 336px;gap:22px;align-items:start;}
+  .home-main{display:flex;flex-direction:column;gap:24px;min-width:0;}
+  .home-side{display:flex;flex-direction:column;gap:20px;min-width:0;}
+  @media (max-width:980px){
+    .home-grid{grid-template-columns:1fr;}
+  }
+
+  .side-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;
+  }
+  .side-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .side-card-head b{font-size:18px;font-weight:700;color:var(--accent-strong);display:flex;align-items:center;gap:6px;}
+  .side-card-empty{font-size:15px;color:var(--ink-faint);padding:4px 2px;}
+
+  /* 公司公告：一般（藍）／重要（紫）兩種色塊，色相沿用證照管理「以顏色區隔」的既有色票，
+     與到期狀態紅／橙／黃／綠的燈號語意刻意區隔，避免混淆。 */
+  .announce-list{display:flex;flex-direction:column;gap:10px;}
+  .announce-item{
+    position:relative;border-radius:9px;padding:10px 34px 10px 12px;
+    background:var(--accent-soft);border-left:3px solid var(--accent);
+  }
+  .announce-item.important{background:var(--p3-bg);border-left-color:var(--p3);}
+  .announce-item b{display:block;font-size:15.5px;font-weight:700;color:var(--ink);margin-bottom:2px;}
+  .announce-item p{margin:0;font-size:14.5px;color:var(--ink-soft);line-height:1.45;white-space:pre-wrap;word-break:break-word;}
+  .announce-item .announce-date{display:block;margin-top:5px;font-size:12.5px;color:var(--ink-faint);}
+  .announce-actions{position:absolute;top:6px;right:6px;display:flex;gap:2px;}
+  .announce-actions .icon-x{font-size:14.5px;padding:3px;}
+
+  /* 本月壽星：依生日資料（員工管理「出生日期」欄位）自動彙整當月在職員工，人像色塊沿用證照管理
+     同一組 3 色循環（藍／水綠／紫），僅作為視覺區隔，非身份分類。 */
+  .birthday-list{display:flex;flex-direction:column;gap:4px;}
+  .birthday-item{display:flex;align-items:center;gap:10px;padding:7px 2px;}
+  .bday-avatar{
+    width:36px;height:36px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;
+    font-size:14.5px;font-weight:700;color:#fff;
+  }
+  .bday-avatar.c1{background:var(--accent);} .bday-avatar.c2{background:var(--p2);} .bday-avatar.c3{background:var(--p3);}
+  .bday-info{flex:1;min-width:0;}
+  .bday-info b{display:block;font-size:15.5px;font-weight:600;color:var(--ink);}
+  .bday-info span{display:block;font-size:13.5px;color:var(--ink-soft);}
+  .bday-tag{flex:none;font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;}
+  .bday-tag.today{background:var(--red-bg);color:var(--red);}
+  .bday-tag.soon{background:var(--orange-bg);color:var(--orange);}
+  .bday-tag.upcoming{background:var(--surface-2);color:var(--ink-faint);}
+
+  /* coming soon placeholder */
+  .coming-soon{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:64px 24px;text-align:center;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+  }
+  .coming-soon-emoji{font-size:53px;line-height:1;}
+  .coming-soon h2{font-family:'Noto Serif TC',serif;font-size:25.5px;margin:2px 0 0;color:var(--accent-strong);font-weight:700;}
+  .coming-soon p{margin:0;color:var(--ink-soft);max-width:460px;}
+
+  /* 人力分配面板 */
+  #worksiteGroups{display:flex;flex-direction:column;gap:14px;}
+  .worksite-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 16px;box-shadow:var(--shadow);
+  }
+  .worksite-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+  .worksite-card-head b{font-size:18.5px;font-weight:700;color:var(--accent-strong);}
+  .worksite-dept .worksite-card-head b{color:var(--ink-soft);}
+  .worksite-member-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;}
+  .worksite-member{
+    all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:2px;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:8px 11px;
+  }
+  .worksite-member:hover{border-color:var(--accent);}
+  .worksite-member.static{cursor:default;}
+  .worksite-member b{font-size:16.5px;font-weight:600;color:var(--ink);}
+  .worksite-member span{font-size:14.5px;color:var(--ink-soft);}
+  /* 外掛人員：固定以紫紅色圖塊區隔（狀態標記，非識別色），並附「外掛」文字徽章，方便一眼辨識。 */
+  .worksite-member.external{background:var(--ext-bg);border-color:var(--ext);}
+  .worksite-member.external:hover{border-color:var(--ext);}
+  .worksite-member .ext-badge{
+    display:inline-block;color:var(--ext);background:var(--surface);border:1px solid var(--ext);
+    border-radius:999px;padding:1px 7px;font-size:12px;font-weight:700;margin-left:4px;
+  }
+
+  /* 人事薪資面板 */
+  #payrollStructure{display:flex;flex-direction:column;gap:14px;margin-top:18px;}
+  .payroll-card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 16px;box-shadow:var(--shadow);
+  }
+  .payroll-card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .payroll-card-head b{font-size:18.5px;font-weight:700;color:var(--accent-strong);}
+  .payroll-card-head .pill{margin-left:auto;}
+  .payroll-item-list{display:flex;flex-wrap:wrap;gap:8px;}
+  .payroll-item{
+    background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
+    padding:7px 12px;font-size:15.5px;color:var(--ink-soft);
+  }
+  .payroll-mini-table{
+    width:100%;max-width:420px;border-collapse:collapse;margin-top:12px;font-size:15.5px;
+  }
+  .payroll-mini-table th{
+    text-align:left;color:var(--accent-strong);font-weight:700;font-size:14px;
+    text-transform:uppercase;letter-spacing:.03em;padding:6px 10px;border-bottom:1px solid var(--line);
+  }
+  .payroll-mini-table td{padding:7px 10px;border-bottom:1px solid var(--line);color:var(--ink-soft);}
+  .payroll-mini-table tr:last-child td{border-bottom:none;}
+
+  @media (max-width:860px){
+    .app-shell{flex-direction:column;}
+    .sidebar{position:static;flex-direction:row;flex-wrap:wrap;width:100%;}
+    .nav-item{width:auto;}
+  }
+
+  /* 手機橫向瀏覽：旋轉後可視高度變矮，縮減頂部標題與側欄留白，避免版面被過度壓縮、減少不必要的捲動。 */
+  @media (max-height:430px) and (orientation:landscape){
+    body{padding-block:14px 32px;}
+    header.top{padding:12px 18px;gap:10px;}
+    .brand{gap:10px;}
+    .brand-logo{width:36px;}
+    header.top h1{font-size:clamp(19px,4vw,25px);}
+    .today-chip{padding:5px 12px;font-size:14.5px;}
+    .home-hero h2{font-size:20px;margin-bottom:2px;}
+    #panel-home{gap:18px;}
+    .sidebar{padding:6px;gap:0;}
+    .nav-item{padding:7px 10px;font-size:16px;}
+    .modal{max-height:94vh;}
+  }
+</style>
+
+<!-- Firebase（相容版 SDK，API 與這份程式碼內建的寫法一致，幾乎不需要另外改程式邏輯） -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+  // ★★★ 請把下面這組換成您自己 Firebase 專案「專案設定 → 一般 → 您的應用程式」頁面裡的設定值 ★★★
+  // 尚未填入正確設定前，系統會自動以「離線示範模式」顯示（不會出錯、不會卡住），方便您先確認畫面。
+  var firebaseConfig = {
+    apiKey: "AIzaSyBYIv8MeOj3-LkVhWmOyBD9zLYBzFXW_dk",
+    authDomain: "xinrong-hr.firebaseapp.com",
+    projectId: "xinrong-hr",
+    storageBucket: "xinrong-hr.firebasestorage.app",
+    messagingSenderId: "772057950058",
+    appId: "1:772057950058:web:ad75d4e0514e6141ab6713"
+  };
+</script>
+</head>
+<body>
+<div id="authGate" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;background:#f3f6fa;">
+  <div style="width:100%;max-width:360px;background:#fff;border:1px solid #dbe3ec;border-radius:14px;padding:30px 26px;box-shadow:0 8px 24px -12px rgba(20,30,45,.18);">
+    <h1 style="font-size:21px;margin:0 0 4px;color:#1d436f;font-weight:800;">信榮營造｜人事管理系統</h1>
+    <p style="margin:0 0 20px;color:#56677c;font-size:14.5px;">請使用管理員帳號登入</p>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="display:block;font-size:14px;font-weight:600;color:#56677c;margin-bottom:4px;">帳號（Email）</label>
+        <input id="authEmail" type="email" autocomplete="username" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #dbe3ec;border-radius:7px;font-size:16px;" />
+      </div>
+      <div>
+        <label style="display:block;font-size:14px;font-weight:600;color:#56677c;margin-bottom:4px;">密碼</label>
+        <input id="authPassword" type="password" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #dbe3ec;border-radius:7px;font-size:16px;" />
+      </div>
+      <div id="authError" style="display:none;background:#fbe8e6;border:1px solid #eec3bd;color:#a4291f;border-radius:7px;padding:8px 12px;font-size:14px;"></div>
+      <button id="authLoginBtn" type="button" style="margin-top:4px;background:#2b5a96;color:#fff;border:none;border-radius:7px;padding:11px;font-size:16px;font-weight:700;cursor:pointer;">登入</button>
+      <div id="authSetupHint" style="display:none;font-size:13px;color:#8494a6;line-height:1.6;margin-top:2px;"></div>
+    </div>
+  </div>
+</div>
+<div id="appRoot" hidden>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <img class="brand-logo" src="data:image/png;base64,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" alt="信榮營造 logo" />
+      <div>
+        <h1><span class="brand-name">信榮營造</span><span class="brand-divider">｜</span><span class="brand-suffix">人事管理系統</span></h1>
+      </div>
+    </div>
+    <div class="today-chip">今日日期　<b id="todayLabel">—</b></div>
+    <button type="button" id="logoutBtn" class="btn ghost small" style="margin-left:4px;">登出</button>
+  </header>
+
+  <div id="banner"></div>
+
+  <div class="app-shell">
+
+    <nav class="sidebar" id="sidebar" aria-label="主選單">
+      <button type="button" class="nav-item" data-panel="home" aria-current="page"><span class="emoji">🏠</span><span class="nav-label">首頁</span></button>
+      <button type="button" class="nav-item" data-panel="employees"><span class="emoji">👥</span><span class="nav-label">員工管理</span></button>
+      <button type="button" class="nav-item" data-panel="worksite"><span class="emoji"><svg width="1em" height="1em" viewBox="0 0 24 24" style="vertical-align:-0.15em" xmlns="http://www.w3.org/2000/svg"><path d="M14 14.5 C18 14 21.5 13.5 22.5 12 C23 11.2 22.6 10.3 21.5 10.2 C19.5 10 16.5 11.5 14 13 Z" fill="#e0a800" stroke="#8a6a12" stroke-width="0.5" stroke-linejoin="round"/><path d="M2.5 15 C2 8.5 6.5 3 12.5 3 C18 3 21 7 21 11.5 C21 13.5 19.5 14.8 17 15.5 C13 16.6 6.5 16.6 3.8 15.6 C3 15.3 2.6 15.2 2.5 15 Z" fill="#f9c633" stroke="#8a6a12" stroke-width="0.7" stroke-linejoin="round"/><path d="M5 8 C6.5 5.5 9 4 11.5 3.8" stroke="#ffe28a" stroke-width="1.3" stroke-linecap="round" fill="none"/><circle cx="6.3" cy="9.5" r="0.5" fill="#c9931a"/><circle cx="7.6" cy="8.3" r="0.5" fill="#c9931a"/><circle cx="9.1" cy="7.4" r="0.5" fill="#c9931a"/><path d="M3.5 15.5 C3.8 17.3 5.8 18.6 8 18.6 C9 18.6 9.6 18.2 9.8 17.6" fill="none" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round"/><circle cx="5.6" cy="17.2" r="0.28" fill="#555"/><circle cx="6.9" cy="17.9" r="0.28" fill="#555"/><circle cx="8.2" cy="18.1" r="0.28" fill="#555"/></svg></span><span class="nav-label">人力分配</span></button>
+      <button type="button" class="nav-item" data-panel="certs"><span class="emoji"><svg width="1em" height="1em" viewBox="0 0 24 24" style="vertical-align:-0.15em" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="2" width="18" height="13" rx="1.5" fill="#eef2f7" stroke="#2b5a96" stroke-width="1.4"/><line x1="6" y1="6" x2="18" y2="6" stroke="#2b5a96" stroke-width="1.3"/><line x1="6" y1="9.2" x2="15" y2="9.2" stroke="#2b5a96" stroke-width="1.3"/><path d="M9 19.5L10.3 15.6L13.7 15.6L15 19.5L12 17.7Z" fill="#c98a1a"/><circle cx="12" cy="15.5" r="3" fill="#e7b13a" stroke="#a97817" stroke-width="0.8"/></svg></span><span class="nav-label">證照管理</span></button>
+      <button type="button" class="nav-item" data-panel="payroll"><span class="emoji">💰</span><span class="nav-label">人事薪資</span><span class="soon-badge">即將推出</span></button>
+    </nav>
+
+    <div class="main-content">
+
+      <section id="panel-home" class="panel">
+        <div class="home-hero">
+          <h2>系統總覽</h2>
+          <p>掌握員工在職狀態、證照到期提醒與公司最新消息，所有資料即時同步給全體管理層。</p>
+        </div>
+
+        <div class="home-grid">
+          <div class="home-main">
+
+            <div class="tiles-group">
+              <div class="tiles-group-label">員工在職狀態</div>
+              <div class="tiles">
+                <button type="button" class="tile all" data-goto="employees"><span class="label"><span class="dot"></span>在職人數</span><span class="count num" id="homeEmpActive">—</span></button>
+                <button type="button" class="tile exempt" data-goto="employees"><span class="label"><span class="dot"></span>離職人數</span><span class="count num" id="homeEmpInactive">—</span></button>
+                <button type="button" class="tile exempt" data-goto="employees"><span class="label"><span class="dot"></span>外掛人數</span><span class="count num" id="homeEmpExternal">—</span></button>
+              </div>
+            </div>
+
+            <div class="tiles-group">
+              <div class="tiles-group-label">證照有效期情形</div>
+              <div class="tiles">
+                <button type="button" class="tile red" data-goto="certs"><span class="label"><span class="dot"></span>立即處理</span><span class="count num" id="homeCertRed">—</span></button>
+                <button type="button" class="tile orange" data-goto="certs"><span class="label"><span class="dot"></span>優先處理</span><span class="count num" id="homeCertOrange">—</span></button>
+                <button type="button" class="tile yellow" data-goto="certs"><span class="label"><span class="dot"></span>即將到期</span><span class="count num" id="homeCertYellow">—</span></button>
+                <button type="button" class="tile green" data-goto="certs"><span class="label"><span class="dot"></span>正常</span><span class="count num" id="homeCertGreen">—</span></button>
+                <button type="button" class="tile all" data-goto="certs"><span class="label"><span class="dot"></span>證照總數</span><span class="count num" id="homeCertAll">—</span></button>
+              </div>
+            </div>
+
+            <div class="tiles-group">
+              <div class="tiles-group-label">常用文件下載</div>
+              <div class="doc-downloads">
+                <a class="btn primary" href="downloads/薪資調整-考核表-信榮.pdf" target="_blank" rel="noopener">⬇ 薪資調整・考核表（PDF，共4頁）</a>
+                <div class="doc-hint">內含：員工薪資異動提報表、年度考核表（工程師／事務員／長僱工）。列印後手寫填寫。</div>
+              </div>
+            </div>
+
+            <div class="module-grid" id="moduleGrid"></div>
+
+          </div>
+
+          <div class="home-side">
+            <div class="side-card">
+              <div class="side-card-head"><b>📣 公司公告</b><button type="button" class="btn small ghost" id="announceAddBtn">＋ 新增</button></div>
+              <div class="announce-list" id="announceList"></div>
+            </div>
+            <div class="side-card">
+              <div class="side-card-head"><b>🎂 本月壽星</b></div>
+              <div class="birthday-list" id="birthdayList"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel-employees" class="panel" hidden>
+
+        <div class="toolbar">
+          <button class="btn primary" id="personnelAddBtn" type="button">＋ 新增人員</button>
+          <input type="search" id="personnelSearch" placeholder="搜尋姓名／職稱／部門…" />
+          <select id="personnelStatusFilter">
+            <option value="all">全部人員</option>
+            <option value="active">僅在職</option>
+            <option value="leave">僅留職停薪</option>
+            <option value="inactive">僅離職</option>
+          </select>
+          <button class="btn ghost" id="personnelClearBtn" type="button">清除篩選</button>
+          <span class="spacer"></span>
+          <button class="btn ghost" id="personnelMergeDuplicatesBtn" type="button" hidden title="偵測同姓名的重複人員紀錄，保留資料較完整的一筆，將另一筆的證照全部轉移過來後刪除">合併重複人員</button>
+          <button class="btn" id="personnelExportBtn" type="button" hidden>匯出 CSV</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th data-psort="titleRank">姓名 / 職稱 <span class="arrow"></span></th>
+                <th data-psort="gender">性別 <span class="arrow"></span></th>
+                <th data-psort="bloodType">血型 <span class="arrow"></span></th>
+                <th data-psort="department">部門 <span class="arrow"></span></th>
+                <th data-psort="hireDate">到職日 <span class="arrow"></span></th>
+                <th data-psort="tenureMonths">年資 <span class="arrow"></span></th>
+                <th data-psort="status">在職狀態 <span class="arrow"></span></th>
+                <th data-psort="departureDate">離職日期 <span class="arrow"></span></th>
+                <th>聯絡方式</th>
+                <th>緊急聯絡人</th>
+                <th style="text-align:right">操作</th>
+              </tr>
+            </thead>
+            <tbody id="personnelTbody">
+              <tr class="skeleton-row"><td colspan="11"><div class="skeleton-bar" style="width:100%"></div></td></tr>
+              <tr class="skeleton-row"><td colspan="11"><div class="skeleton-bar" style="width:92%"></div></td></tr>
+              <tr class="skeleton-row"><td colspan="11"><div class="skeleton-bar" style="width:96%"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="personnelPagination"></div>
+
+      </section>
+
+      <section id="panel-worksite" class="panel" hidden>
+        <div class="home-hero">
+          <h2>人力分配</h2>
+        </div>
+        <div id="worksiteGroups"></div>
+      </section>
+
+      <section id="panel-certs" class="panel" hidden>
+
+        <div class="tiles" id="tiles" role="group" aria-label="依燈號篩選"></div>
+        <div class="legend">
+          <span><i class="r"></i>立即處理：已過期</span>
+          <span><i class="o"></i>優先處理：30 天內到期（含當天）</span>
+          <span><i class="y"></i>即將到期：31–90 天內到期</span>
+          <span><i class="g"></i>正常：90 天以上</span>
+          <span><i class="e"></i>灰・免回訓：無到期限制，不列入提醒</span>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn primary" id="addBtn" type="button">＋ 新增證照</button>
+          <input type="search" id="search" placeholder="搜尋姓名／職稱／證照名稱／工地…" />
+          <button class="btn ghost" id="clearBtn" type="button">清除篩選</button>
+          <span class="spacer"></span>
+          <button class="btn" id="exportBtn" type="button" hidden>匯出 CSV</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:2%"></th>
+                <th data-sort="name">姓名 / 職稱 <span class="arrow"></span></th>
+                <th data-sort="certType">證照 / 資格名稱 <span class="arrow"></span></th>
+                <th data-sort="usedWorksite">證照用於工地 <span class="arrow"></span></th>
+                <th data-sort="issueDate">發證日期 <span class="arrow"></span></th>
+                <th data-sort="lastRetrainDate">最近回訓日 <span class="arrow"></span></th>
+                <th data-sort="expiryDate">到期日 <span class="arrow"></span></th>
+                <th data-sort="daysRemaining">狀態 <span class="arrow"></span></th>
+                <th>備註／回訓報名狀態</th>
+                <th style="text-align:right">操作</th>
+              </tr>
+            </thead>
+            <tbody id="tbody">
+              <tr class="skeleton-row"><td colspan="10"><div class="skeleton-bar" style="width:100%"></div></td></tr>
+              <tr class="skeleton-row"><td colspan="10"><div class="skeleton-bar" style="width:92%"></div></td></tr>
+              <tr class="skeleton-row"><td colspan="10"><div class="skeleton-bar" style="width:96%"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="certsPagination"></div>
+
+      </section>
+
+      <section id="panel-payroll" class="panel" hidden>
+        <div id="payrollLocked">
+          <div class="coming-soon">
+            <div class="coming-soon-emoji">🔒</div>
+            <h2>人事薪資（權限受限）</h2>
+            <p>僅限授權人員查看，請輸入密碼以繼續。</p>
+            <div class="field" style="max-width:260px;margin:14px auto 0;text-align:left;">
+              <label for="payrollPinInput">存取密碼</label>
+              <input id="payrollPinInput" type="password" inputmode="numeric" placeholder="請輸入密碼" />
+            </div>
+            <div id="payrollPinError" class="form-error" style="display:none;max-width:260px;margin:8px auto 0;"></div>
+            <button class="btn primary" id="payrollUnlockBtn" type="button" style="margin-top:12px;">解鎖</button>
+          </div>
+        </div>
+        <div id="payrollContent" hidden>
+          <div class="home-hero">
+            <h2>💰 人事薪資</h2>
+            <p>以下為「人事薪資」模組規劃的功能結構，目前尚未開放實際填寫、計算與儲存，各子項目將依序開發上線。此區塊已設定獨立密碼保護，與其他模組的存取權限分開管理。</p>
+          </div>
+          <div id="payrollStructure"></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer class="foot">全公司人事與證照資料僅供內部管理使用・資料即時同步給所有開啟此頁面的管理層</footer>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <h2 id="modalTitle">新增證照</h2>
+      <button class="icon-x" id="closeModal" type="button" aria-label="關閉">✕</button>
+    </div>
+    <form class="modal-body" id="certForm">
+      <div id="formError"></div>
+      <div class="field">
+        <label for="f_employeeId">人員（由人員資料庫選取） <span class="req" id="employeeReqMark">*</span></label>
+        <select id="f_employeeId"></select>
+        <label style="display:flex;align-items:center;gap:7px;font-weight:500;font-size:15px;color:var(--ink-soft);margin-top:8px;cursor:pointer;">
+          <input type="checkbox" id="f_manualPerson" style="width:18px;height:18px;" />
+          人員資料庫查無此人，暫以手動輸入姓名／職稱
+        </label>
+      </div>
+      <div class="field-row" id="manualPersonRow" hidden>
+        <div class="field">
+          <label for="f_name">姓名 <span class="req">*</span></label>
+          <input id="f_name" name="name" />
+        </div>
+        <div class="field">
+          <label for="f_title">職稱</label>
+          <input id="f_title" name="title" placeholder="例：工地主任" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="f_presetSelect">常用證照快速套用（選填）</label>
+        <select id="f_presetSelect"></select>
+      </div>
+      <div class="field">
+        <label for="f_certType">證照 / 資格名稱 <span class="req">*</span></label>
+        <input id="f_certType" name="certType" required placeholder="例：施工架組配作業主管安全衛生教育訓練" />
+      </div>
+      <div class="field">
+        <label for="f_usedWorksite">目前證照用於工地案場（選填）</label>
+        <select id="f_usedWorksite"></select>
+        <div class="muted" style="font-size:14px;margin-top:4px;">此證照目前實際用於（如掛證、借調支援）的工地案場，與人員指派工地各自獨立、互不代表，請依實際情形個別填寫。</div>
+      </div>
+      <div class="field" id="usedWorksiteOtherRow" hidden>
+        <label for="f_usedWorksiteOther">請輸入工地案場名稱</label>
+        <input id="f_usedWorksiteOther" placeholder="例：OOOO新建工程" />
+      </div>
+      <div class="field">
+        <label for="f_issueDate_y">發證日期</label>
+        <div class="roc-date-row">
+          <input id="f_issueDate_y" type="number" inputmode="numeric" placeholder="112" min="1" max="200" /><span>年</span>
+          <input id="f_issueDate_m" type="number" inputmode="numeric" placeholder="07" min="1" max="12" /><span>月</span>
+          <input id="f_issueDate_d" type="number" inputmode="numeric" placeholder="26" min="1" max="31" /><span>日</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f_lastRetrain_y">最近一次回訓日期（選填）</label>
+        <div class="roc-date-row">
+          <input id="f_lastRetrain_y" type="number" inputmode="numeric" placeholder="112" min="1" max="200" /><span>年</span>
+          <input id="f_lastRetrain_m" type="number" inputmode="numeric" placeholder="07" min="1" max="12" /><span>月</span>
+          <input id="f_lastRetrain_d" type="number" inputmode="numeric" placeholder="26" min="1" max="31" /><span>日</span>
+        </div>
+        <div class="muted" style="font-size:14px;margin-top:4px;">若已完成回訓，登打回訓證明日期後，到期日改從此日起算，而非原發證日。</div>
+      </div>
+      <div class="field">
+        <label for="f_cycleYears">回訓／效期週期（年，選填）</label>
+        <div class="roc-date-row">
+          <input id="f_cycleYears" type="number" inputmode="numeric" placeholder="例：4" min="1" max="20" />
+          <button class="btn small ghost" id="applyCycleBtn" type="button">算出到期日</button>
+        </div>
+        <div class="muted" style="font-size:14px;margin-top:4px;">依「最近回訓日」（若已填）或「發證日期」＋週期，自動算出到期日；此欄僅供換算，不會另外儲存。</div>
+      </div>
+      <div class="field">
+        <label for="f_expiryDate_y">到期日 <span class="req" id="expiryReqMark">*</span></label>
+        <div class="roc-date-row">
+          <input id="f_expiryDate_y" type="number" inputmode="numeric" placeholder="112" min="1" max="200" required /><span>年</span>
+          <input id="f_expiryDate_m" type="number" inputmode="numeric" placeholder="07" min="1" max="12" required /><span>月</span>
+          <input id="f_expiryDate_d" type="number" inputmode="numeric" placeholder="26" min="1" max="31" required /><span>日</span>
+        </div>
+        <label style="display:flex;align-items:center;gap:7px;font-weight:500;font-size:15px;color:var(--ink-soft);margin-top:8px;cursor:pointer;">
+          <input type="checkbox" id="f_exempt" style="width:18px;height:18px;" />
+          免回訓（此證照無到期限制，不需定期回訓，不列入到期提醒）
+        </label>
+      </div>
+      <div class="field">
+        <label for="f_notes">備註</label>
+        <textarea id="f_notes" name="notes" placeholder="例：已報名10/15回訓場次、尚未報名、已完成回訓候補證書中"></textarea>
+      </div>
+    </form>
+    <div class="modal-foot">
+      <button class="btn ghost" id="cancelBtn" type="button">取消</button>
+      <button class="btn primary" id="saveBtn" type="button">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="personnelOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="personnelModalTitle">
+    <div class="modal-head">
+      <h2 id="personnelModalTitle">新增人員</h2>
+      <button class="icon-x" id="closePersonnelModal" type="button" aria-label="關閉">✕</button>
+    </div>
+    <form class="modal-body" id="personnelForm">
+      <div id="personnelFormError"></div>
+
+      <div class="field-section-title">基本資料</div>
+      <div class="field">
+        <label for="p_name">姓名 <span class="req">*</span></label>
+        <input id="p_name" name="name" required />
+      </div>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:7px;font-weight:500;cursor:pointer;">
+          <input type="checkbox" id="p_isExternal" style="width:18px;height:18px;" />
+          外掛人員（無基本資料／聯絡資訊，僅登打姓名、部門／工地案場與證照資料）
+        </label>
+        <div class="muted" style="font-size:14px;margin-top:4px;">適用於非正式員工、僅為掛證／支援等目的登錄的人員；勾選後以下個人資料欄位將隱藏並不會儲存，但仍可選填部門／工地案場，以利「人力分配」模組歸類。</div>
+      </div>
+
+      <div class="field-section-title">人力分配（部門／工地案場）</div>
+      <div class="field-row">
+        <div class="field">
+          <label for="p_departmentSelect">部門</label>
+          <select id="p_departmentSelect"></select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="p_worksiteSelect">指派工地案場（選填）</label>
+        <select id="p_worksiteSelect"></select>
+        <div class="muted" style="font-size:14px;margin-top:4px;">不填也沒關係，「人力分配」模組會直接依上方「部門」自動歸類；若此人員目前實際派駐某工地專案，才需要另外選擇，選擇後會優先依工地案場分組顯示。</div>
+      </div>
+      <div class="field" id="worksiteOtherRow" hidden>
+        <label for="p_worksiteOther">請輸入工地案場名稱</label>
+        <input id="p_worksiteOther" placeholder="例：OOOO新建工程" />
+      </div>
+
+      <div id="personnelFullInfoFields">
+      <div class="field-row">
+        <div class="field">
+          <label for="p_idNumber">身分證字號</label>
+          <input id="p_idNumber" name="idNumber" placeholder="例：A123456789" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="p_gender">性別</label>
+          <select id="p_gender" name="gender">
+            <option value="">—</option>
+            <option value="male">男</option>
+            <option value="female">女</option>
+            <option value="other">不提供</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="p_bloodType">血型</label>
+          <select id="p_bloodType" name="bloodType">
+            <option value="">—</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="AB">AB</option>
+            <option value="O">O</option>
+            <option value="unknown">不確定</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f_birthDate_y">出生年月日（選填）</label>
+        <div class="roc-date-row">
+          <input id="f_birthDate_y" type="number" inputmode="numeric" placeholder="60" min="1" max="200" /><span>年</span>
+          <input id="f_birthDate_m" type="number" inputmode="numeric" placeholder="07" min="1" max="12" /><span>月</span>
+          <input id="f_birthDate_d" type="number" inputmode="numeric" placeholder="26" min="1" max="31" /><span>日</span>
+        </div>
+      </div>
+
+      <div class="field-section-title">聯絡資訊</div>
+      <div class="field-row">
+        <div class="field">
+          <label for="p_phone">聯絡電話</label>
+          <input id="p_phone" name="phone" placeholder="例：0912-345678" />
+        </div>
+        <div class="field">
+          <label for="p_email">Email</label>
+          <input id="p_email" name="email" type="email" placeholder="例：name@company.com" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="p_address">通訊地址</label>
+        <textarea id="p_address" name="address" placeholder="通訊地址"></textarea>
+      </div>
+      <div class="field">
+        <label for="p_householdAddress">戶籍地址</label>
+        <textarea id="p_householdAddress" name="householdAddress" placeholder="戶籍地址"></textarea>
+        <label style="display:flex;align-items:center;gap:7px;font-weight:500;font-size:15px;color:var(--ink-soft);margin-top:8px;cursor:pointer;">
+          <input type="checkbox" id="p_householdSame" style="width:18px;height:18px;" />
+          同通訊地址
+        </label>
+      </div>
+
+      <div class="field-section-title">緊急聯絡人</div>
+      <div class="field-row">
+        <div class="field">
+          <label for="p_emergencyName">緊急聯絡人姓名</label>
+          <input id="p_emergencyName" name="emergencyName" placeholder="例：王小華" />
+        </div>
+        <div class="field">
+          <label for="p_emergencyRelationSelect">關係</label>
+          <select id="p_emergencyRelationSelect"></select>
+        </div>
+      </div>
+      <div class="field" id="emergencyRelationOtherRow" hidden>
+        <label for="p_emergencyRelationOther">請輸入關係</label>
+        <input id="p_emergencyRelationOther" placeholder="例：朋友" />
+      </div>
+      <div class="field">
+        <label for="p_emergencyPhone">緊急聯絡人電話</label>
+        <input id="p_emergencyPhone" name="emergencyPhone" placeholder="例：0987-654321" />
+      </div>
+
+      <div class="field-section-title">任職資訊</div>
+      <div class="field-row">
+        <div class="field">
+          <label for="p_titleSelect">公司職務</label>
+          <select id="p_titleSelect"></select>
+        </div>
+      </div>
+      <div class="field" id="titleOtherRow" hidden>
+        <label for="p_titleOther">請輸入職務名稱</label>
+        <input id="p_titleOther" placeholder="例：機電工程師" />
+      </div>
+      <div class="field">
+        <label for="f_hireDate_y">到職日期（選填）</label>
+        <div class="roc-date-row">
+          <input id="f_hireDate_y" type="number" inputmode="numeric" placeholder="112" min="1" max="200" /><span>年</span>
+          <input id="f_hireDate_m" type="number" inputmode="numeric" placeholder="07" min="1" max="12" /><span>月</span>
+          <input id="f_hireDate_d" type="number" inputmode="numeric" placeholder="26" min="1" max="31" /><span>日</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="p_status">在職狀態</label>
+        <select id="p_status" name="status">
+          <option value="active">在職</option>
+          <option value="leave">留職停薪</option>
+          <option value="inactive">離職</option>
+        </select>
+      </div>
+      <div class="field" id="departureDateRow" hidden>
+        <label for="f_departureDate_y">離職日期</label>
+        <div class="roc-date-row">
+          <input id="f_departureDate_y" type="number" inputmode="numeric" placeholder="112" min="1" max="200" /><span>年</span>
+          <input id="f_departureDate_m" type="number" inputmode="numeric" placeholder="07" min="1" max="12" /><span>月</span>
+          <input id="f_departureDate_d" type="number" inputmode="numeric" placeholder="26" min="1" max="31" /><span>日</span>
+        </div>
+      </div>
+      <div class="field" id="leaveStartDateRow" hidden>
+        <label for="f_leaveStartDate_y">留職停薪起始日</label>
+        <div class="roc-date-row">
+          <input id="f_leaveStartDate_y" type="number" inputmode="numeric" placeholder="112" min="1" max="200" /><span>年</span>
+          <input id="f_leaveStartDate_m" type="number" inputmode="numeric" placeholder="07" min="1" max="12" /><span>月</span>
+          <input id="f_leaveStartDate_d" type="number" inputmode="numeric" placeholder="26" min="1" max="31" /><span>日</span>
+        </div>
+      </div>
+      <div class="field" id="leaveReasonRow" hidden>
+        <label for="p_leaveReason">留職停薪原因</label>
+        <textarea id="p_leaveReason" placeholder="例：育嬰留職停薪、服兵役、進修等"></textarea>
+      </div>
+      </div>
+
+      <div class="field-section-title">證照資料（選填，可新增多筆）</div>
+      <div id="personnelCertRows"></div>
+      <button class="btn small ghost" id="addPersonnelCertRowBtn" type="button">＋ 新增一筆證照</button>
+    </form>
+    <div class="modal-foot">
+      <button class="btn ghost" id="personnelCancelBtn" type="button">取消</button>
+      <button class="btn primary" id="personnelSaveBtn" type="button">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="announceOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="announceModalTitle">
+    <div class="modal-head">
+      <h2 id="announceModalTitle">新增公告</h2>
+      <button class="icon-x" id="closeAnnounceModal" type="button" aria-label="關閉">✕</button>
+    </div>
+    <form class="modal-body" id="announceForm">
+      <div id="announceFormError"></div>
+      <div class="field">
+        <label for="f_announceTitle">公告標題 <span class="req">*</span></label>
+        <input id="f_announceTitle" required placeholder="例：中秋節連假辦公室休假通知" />
+      </div>
+      <div class="field">
+        <label for="f_announceBody">內容（選填）</label>
+        <textarea id="f_announceBody" placeholder="公告詳細內容"></textarea>
+      </div>
+      <div class="field">
+        <label for="f_announceType">公告類型</label>
+        <select id="f_announceType">
+          <option value="normal">一般公告</option>
+          <option value="important">重要公告</option>
+        </select>
+      </div>
+    </form>
+    <div class="modal-foot">
+      <button class="btn ghost" id="announceCancelBtn" type="button">取消</button>
+      <button class="btn primary" id="announceSaveBtn" type="button">儲存</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+(function(){
+
+  // ================= Firebase 初始化（不碰畫面／資料狀態，可安全提早執行） =================
+  var firebaseReady = false;
+  try{
+    firebase.initializeApp(firebaseConfig);
+    firebaseReady = true;
+  }catch(e){ firebaseReady = false; }
+
+  function getFirebaseDb(){
+    if(!firebaseReady) return Promise.resolve(null);
+    try{ return Promise.resolve(firebase.firestore()); }catch(e){ return Promise.resolve(null); }
+  }
+  // ================================================================
+
+  "use strict";
+
+  // 四級燈號門檻：已過期＝紅（立即處理）；0~30天＝橙（優先處理）；31~90天＝黃（即將到期）；90天以上＝綠（正常）
+  var ORANGE_DAYS = 30;    // 剩餘天數 0~30（未過期）為橙燈
+  var YELLOW_DAYS = 90;    // 剩餘天數 31~90 為黃燈，其餘為綠燈
+
+  // 常用證照回訓週期參考（年）— 選填快速套用，實際到期日仍以每人實際證書為準
+  var CERT_PRESETS = [
+    {name:'公共工程品質管理人員', cycle:4, note:'逾4年須完成36小時回訓，始得繼續擔任現場品管人員'},
+    {name:'營造業工地主任', cycle:4, note:'每逾4年應再取得最近4年內之回訓證明，始得繼續執業'},
+    {name:'職業安全衛生管理人員（含乙級管理員）', cycle:2},
+    {name:'職業安全衛生業務主管（甲、乙、丙種）', cycle:2},
+    {name:'營造業甲種業務主管', cycle:2},
+    {name:'廢棄物清理專業技術人員', cycle:2},
+    {name:'甲級空氣污染防制專責人員', cycle:2},
+    {name:'甲級廢（污）水處理專責人員', cycle:2},
+    {name:'室內空氣品質維護管理專責人員', cycle:2},
+    {name:'職安卡', cycle:3},
+    {name:'急救人員安全衛生教育訓練', cycle:3},
+    {name:'隧道等襯砌作業主管', cycle:3},
+    {name:'屋頂作業主管', cycle:3},
+    {name:'隧道等挖掘作業主管', cycle:3},
+    {name:'鋼構組配作業主管', cycle:3},
+    {name:'施工架組配作業主管', cycle:3},
+    {name:'模板支撐作業主管', cycle:3},
+    {name:'露天開挖作業主管', cycle:3},
+    {name:'擋土支撐作業主管', cycle:3},
+    {name:'缺氧作業主管', cycle:3},
+    {name:'有機溶劑作業主管', cycle:3},
+    {name:'鉛作業主管', cycle:3},
+    {name:'粉塵作業主管', cycle:3}
+  ];
+
+  // 常用公司職務清單（人員資料表單用，同時決定員工管理／證照管理姓名職稱欄的排序優先順序）
+  // — 管理層級順序：總經理／副總經理／協理／經理／襄理，其後為其他職務；選單以外的職務可用「其他」自行輸入
+  var TITLE_PRESETS = ['總經理','副總經理','協理','經理','襄理','主任','工程師','品管人員','職安人員','行政人員','長僱工'];
+
+  // 常用部門清單（人員資料表單用）— 選單以外的部門可用「其他」自行輸入
+  var DEPARTMENT_PRESETS = ['管理部','工務部','採購部'];
+
+  // 「人力分配」模組部門卡片的顯示順序：管理部置頂，依序採購部、工務部（僅供該模組排序使用，
+  // 與上面表單下拉選單的 DEPARTMENT_PRESETS 順序各自獨立）
+  var WORKSITE_PANEL_DEPT_ORDER = ['管理部','採購部','工務部'];
+
+  // 目前進行中的工地案場清單（員工管理表單「指派工地案場」用，與部門互相獨立）
+  // 選了工地案場的在職人員，會顯示在「人力分配」模組對應的工地分組中；案場會隨專案增減，故保留「其他」可自行輸入新案名
+  var WORKSITE_PRESETS = ['花蓮廠SUN專案-土木基礎工程','安風161kV開閉所新建工程','彰一開閉所配電室新建工程'];
+
+  // 「人力分配」模組工地案場卡片的顯示順序（僅供該模組排序使用，與上面表單下拉選單的
+  // WORKSITE_PRESETS 順序各自獨立）
+  var WORKSITE_PANEL_SITE_ORDER = ['彰一開閉所配電室新建工程','安風161kV開閉所新建工程','花蓮廠SUN專案-土木基礎工程'];
+
+  // 緊急聯絡人與本人關係常用選項（員工管理表單用）— 選單以外的關係可用「其他」自行輸入
+  var EMERGENCY_RELATION_PRESETS = ['配偶','妹','弟'];
+
+  // 職務層級（依 TITLE_PRESETS 順序，數字越小代表層級越高）— 未列於清單中的職稱（含空白／自訂）排在最後
+  function titleRank(title){
+    var idx = TITLE_PRESETS.indexOf(title || '');
+    return idx === -1 ? TITLE_PRESETS.length : idx;
+  }
+
+  var els = {
+    banner: document.getElementById('banner'),
+    tiles: document.getElementById('tiles'),
+    tbody: document.getElementById('tbody'),
+    search: document.getElementById('search'),
+    clearBtn: document.getElementById('clearBtn'),
+    exportBtn: document.getElementById('exportBtn'),
+    addBtn: document.getElementById('addBtn'),
+    overlay: document.getElementById('overlay'),
+    modalTitle: document.getElementById('modalTitle'),
+    closeModal: document.getElementById('closeModal'),
+    cancelBtn: document.getElementById('cancelBtn'),
+    saveBtn: document.getElementById('saveBtn'),
+    form: document.getElementById('certForm'),
+    formError: document.getElementById('formError'),
+    todayLabel: document.getElementById('todayLabel'),
+
+    sidebar: document.getElementById('sidebar'),
+    moduleGrid: document.getElementById('moduleGrid'),
+
+    personnelTbody: document.getElementById('personnelTbody'),
+    personnelSearch: document.getElementById('personnelSearch'),
+    personnelStatusFilter: document.getElementById('personnelStatusFilter'),
+    personnelClearBtn: document.getElementById('personnelClearBtn'),
+    personnelMergeDuplicatesBtn: document.getElementById('personnelMergeDuplicatesBtn'),
+    personnelExportBtn: document.getElementById('personnelExportBtn'),
+    personnelAddBtn: document.getElementById('personnelAddBtn'),
+    personnelOverlay: document.getElementById('personnelOverlay'),
+    personnelModalTitle: document.getElementById('personnelModalTitle'),
+    closePersonnelModal: document.getElementById('closePersonnelModal'),
+    personnelCancelBtn: document.getElementById('personnelCancelBtn'),
+    personnelSaveBtn: document.getElementById('personnelSaveBtn'),
+    personnelForm: document.getElementById('personnelForm'),
+    personnelFormError: document.getElementById('personnelFormError'),
+
+    announceList: document.getElementById('announceList'),
+    announceAddBtn: document.getElementById('announceAddBtn'),
+    announceOverlay: document.getElementById('announceOverlay'),
+    announceModalTitle: document.getElementById('announceModalTitle'),
+    closeAnnounceModal: document.getElementById('closeAnnounceModal'),
+    announceCancelBtn: document.getElementById('announceCancelBtn'),
+    announceSaveBtn: document.getElementById('announceSaveBtn'),
+    announceForm: document.getElementById('announceForm'),
+    announceFormError: document.getElementById('announceFormError'),
+    birthdayList: document.getElementById('birthdayList')
+  };
+
+  var state = {
+    certs: [],          // {id, name, title, certType, issueDate, expiryDate, notes, personnelId, usedWorksite}
+    loading: true,
+    dbMode: 'pending',  // pending | live | offline
+    usingCachedCerts: false,      // 離線時：目前顯示的是上次連線快取的公司真實資料，而非示範資料
+    usingCachedPersonnel: false,
+    filterStatus: 'all',
+    search: '',
+    sortField: 'name',
+    sortDir: 'asc',
+    editingId: null,
+    certsPage: 1, // 證照管理分頁：每頁 20 筆，超出自動跳下一頁
+
+    personnel: [],        // {id, name, isExternal, title, department, hireDate, birthDate, status, phone, email, address}
+    personnelLoading: true,
+    personnelSearch: '',
+    personnelStatusFilter: 'all',
+    personnelSortField: 'titleRank', // 預設固定排序（不須點選）：總經理／副總經理／協理／經理／襄理依職務層級排序，
+                                      // 襄理以下（含未列職稱）改依到職日期由早到晚排序，未填到職日期者排在最後
+    personnelSortDir: 'asc',
+    editingPersonnelId: null,
+    personnelPage: 1, // 員工管理分頁：每頁 20 筆，超出自動跳下一頁
+
+    announcements: [],       // {id, title, body, type:'normal'|'important', postedAt}
+    announcementsLoading: true,
+    usingCachedAnnouncements: false,
+    editingAnnouncementId: null,
+
+    payrollUnlocked: false // 「人事薪資」模組的獨立密碼鎖是否已解鎖（僅存於本次瀏覽，重新整理頁面須重新輸入）
+  };
+
+  var db = null;
+  var downloadsApi = null;
+  var col = null;
+  var personnelCol = null;
+  var announcementsCol = null;
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function fmtDate(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+
+  // ---- ROC  date helpers — storage stays Gregorian ISO (YYYY-MM-DD), only display/edit uses 民國 ----
+  function gregToRocParts(iso){
+    var p = iso.split('-').map(Number);
+    return { y: p[0]-1911, m: p[1], d: p[2] };
+  }
+  function fmtRocCompact(iso){
+    if(!iso) return '—';
+    var r = gregToRocParts(iso);
+    return r.y+'/'+pad(r.m)+'/'+pad(r.d);
+  }
+  function fmtRocFull(iso){
+    if(!iso) return '—';
+    var r = gregToRocParts(iso);
+    return '民國'+r.y+'年'+pad(r.m)+'月'+pad(r.d)+'日';
+  }
+  function setRocInputs(prefix, iso){
+    var yEl = document.getElementById('f_'+prefix+'_y'), mEl = document.getElementById('f_'+prefix+'_m'), dEl = document.getElementById('f_'+prefix+'_d');
+    if(!iso){ yEl.value=''; mEl.value=''; dEl.value=''; return; }
+    var r = gregToRocParts(iso);
+    yEl.value = r.y; mEl.value = pad(r.m); dEl.value = pad(r.d);
+  }
+  // 通用民國年／月／日驗證（供固定欄位 readRocDate 與動態列共用）
+  function readRocDateParts(y, m, d, required, fieldLabel){
+    y = (y||'').trim(); m = (m||'').trim(); d = (d||'').trim();
+    if(!y && !m && !d){
+      if(required) return {error: fieldLabel+'為必填，請輸入年／月／日。'};
+      return {iso: ''};
+    }
+    if(!y || !m || !d){
+      return {error: fieldLabel+'請完整輸入年、月、日。'};
+    }
+    var ry = Number(y), mm = Number(m), dd = Number(d);
+    if(!ry || ry<1 || mm<1 || mm>12 || dd<1 || dd>31){
+      return {error: fieldLabel+'數值不正確，請確認年／月／日。'};
+    }
+    var gy = ry + 1911;
+    var check = new Date(gy, mm-1, dd);
+    if(check.getFullYear() !== gy || check.getMonth() !== mm-1 || check.getDate() !== dd){
+      return {error: fieldLabel+'日期不存在，請確認月份／日期是否正確。'};
+    }
+    return {iso: gy+'-'+pad(mm)+'-'+pad(dd)};
+  }
+  function readRocDate(prefix, required, fieldLabel){
+    var y = document.getElementById('f_'+prefix+'_y').value;
+    var m = document.getElementById('f_'+prefix+'_m').value;
+    var d = document.getElementById('f_'+prefix+'_d').value;
+    return readRocDateParts(y, m, d, required, fieldLabel);
+  }
+
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  els.todayLabel.textContent = fmtRocFull(fmtDate(today)) + '（' + ['日','一','二','三','四','五','六'][today.getDay()] + '）';
+
+  // ---------- sidebar navigation ----------
+  var MODULES = [
+    {key:'home', emoji:'🏠', title:'首頁', desc:'系統總覽與快速入口。', live:true},
+    {key:'employees', emoji:'👥', title:'員工管理', desc:'員工基本資料、緊急聯絡人與在職狀態。', live:true},
+    {key:'worksite', emoji:'<svg width="1em" height="1em" viewBox="0 0 24 24" style="vertical-align:-0.15em" xmlns="http://www.w3.org/2000/svg"><path d="M14 14.5 C18 14 21.5 13.5 22.5 12 C23 11.2 22.6 10.3 21.5 10.2 C19.5 10 16.5 11.5 14 13 Z" fill="#e0a800" stroke="#8a6a12" stroke-width="0.5" stroke-linejoin="round"/><path d="M2.5 15 C2 8.5 6.5 3 12.5 3 C18 3 21 7 21 11.5 C21 13.5 19.5 14.8 17 15.5 C13 16.6 6.5 16.6 3.8 15.6 C3 15.3 2.6 15.2 2.5 15 Z" fill="#f9c633" stroke="#8a6a12" stroke-width="0.7" stroke-linejoin="round"/><path d="M5 8 C6.5 5.5 9 4 11.5 3.8" stroke="#ffe28a" stroke-width="1.3" stroke-linecap="round" fill="none"/><circle cx="6.3" cy="9.5" r="0.5" fill="#c9931a"/><circle cx="7.6" cy="8.3" r="0.5" fill="#c9931a"/><circle cx="9.1" cy="7.4" r="0.5" fill="#c9931a"/><path d="M3.5 15.5 C3.8 17.3 5.8 18.6 8 18.6 C9 18.6 9.6 18.2 9.8 17.6" fill="none" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round"/><circle cx="5.6" cy="17.2" r="0.28" fill="#555"/><circle cx="6.9" cy="17.9" r="0.28" fill="#555"/><circle cx="8.2" cy="18.1" r="0.28" fill="#555"/></svg>', title:'人力分配', desc:'依員工管理指派的工地案場，彙整在職人力分佈。', live:true},
+    {key:'certs', emoji:'<svg width="1em" height="1em" viewBox="0 0 24 24" style="vertical-align:-0.15em" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="2" width="18" height="13" rx="1.5" fill="#eef2f7" stroke="#2b5a96" stroke-width="1.4"/><line x1="6" y1="6" x2="18" y2="6" stroke="#2b5a96" stroke-width="1.3"/><line x1="6" y1="9.2" x2="15" y2="9.2" stroke="#2b5a96" stroke-width="1.3"/><path d="M9 19.5L10.3 15.6L13.7 15.6L15 19.5L12 17.7Z" fill="#c98a1a"/><circle cx="12" cy="15.5" r="3" fill="#e7b13a" stroke="#a97817" stroke-width="0.8"/></svg>', title:'證照管理', desc:'證照效期燈號與回訓排程。', live:true},
+    {key:'payroll', emoji:'💰', title:'人事薪資', desc:'薪資結構、每月薪資、扣款與發放紀錄（獨立密碼保護）。', live:false}
+  ];
+
+  function switchPanel(key){
+    MODULES.forEach(function(m){
+      var sec = document.getElementById('panel-'+m.key);
+      if(sec) sec.hidden = (m.key !== key);
+    });
+    Array.prototype.forEach.call(els.sidebar.querySelectorAll('.nav-item'), function(btn){
+      if(btn.getAttribute('data-panel') === key) btn.setAttribute('aria-current','page');
+      else btn.removeAttribute('aria-current');
+    });
+    if(key === 'home') renderHome();
+    if(key === 'worksite') renderWorksitePanel();
+    if(key === 'payroll') renderPayrollPanel();
+  }
+  Array.prototype.forEach.call(els.sidebar.querySelectorAll('.nav-item'), function(btn){
+    btn.addEventListener('click', function(){ switchPanel(btn.getAttribute('data-panel')); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#panel-home [data-goto]'), function(btn){
+    btn.addEventListener('click', function(){ switchPanel(btn.getAttribute('data-goto')); });
+  });
+
+  (function renderModuleGrid(){
+    els.moduleGrid.innerHTML = MODULES.filter(function(m){ return m.key !== 'home'; }).map(function(m){
+      return '<button type="button" class="module-card" data-goto="'+m.key+'">'+
+        '<div class="mc-head"><span class="mc-title">'+m.emoji+' '+escapeHtml(m.title)+'</span>'+
+        '<span class="mc-badge '+(m.live?'live':'soon')+'">'+(m.live?'已上線':'即將推出')+'</span></div>'+
+        '<div class="mc-desc">'+escapeHtml(m.desc)+'</div>'+
+      '</button>';
+    }).join('');
+    Array.prototype.forEach.call(els.moduleGrid.querySelectorAll('[data-goto]'), function(btn){
+      btn.addEventListener('click', function(){ switchPanel(btn.getAttribute('data-goto')); });
+    });
+  })();
+
+  function renderHome(){
+    var enriched = state.certs.map(enrich);
+    var counts = {all: enriched.length, red:0, orange:0, yellow:0, green:0};
+    enriched.forEach(function(c){ if(counts[c.status]!==undefined) counts[c.status]++; });
+    document.getElementById('homeCertRed').textContent = counts.red;
+    document.getElementById('homeCertOrange').textContent = counts.orange;
+    document.getElementById('homeCertYellow').textContent = counts.yellow;
+    document.getElementById('homeCertGreen').textContent = counts.green;
+    document.getElementById('homeCertAll').textContent = counts.all;
+    // 「在職人數」／「離職人數」僅計入正式員工（不含外掛人員，外掛人員一律計入「外掛人數」），
+    // 且僅計「在職」狀態本身，不含「留職停薪」，口徑與員工管理的「僅在職」／「僅離職」篩選結果一致。
+    var activeCount = state.personnel.filter(function(p){ return !p.isExternal && (p.status||'active') === 'active'; }).length;
+    var inactiveCount = state.personnel.filter(function(p){ return !p.isExternal && p.status === 'inactive'; }).length;
+    var externalCount = state.personnel.filter(function(p){ return !!p.isExternal; }).length;
+    document.getElementById('homeEmpActive').textContent = activeCount;
+    document.getElementById('homeEmpInactive').textContent = inactiveCount;
+    document.getElementById('homeEmpExternal').textContent = externalCount;
+    renderAnnouncements();
+    renderBirthdays();
+  }
+
+  // ---- 公司公告 ----
+  function renderAnnouncements(){
+    var list = state.announcements.slice().sort(function(a,b){
+      return String(b.postedAt||'').localeCompare(String(a.postedAt||''));
+    });
+    if(state.announcementsLoading){
+      els.announceList.innerHTML = '<div class="side-card-empty">載入中…</div>';
+      return;
+    }
+    if(list.length === 0){
+      els.announceList.innerHTML = '<div class="side-card-empty">目前沒有公告。</div>';
+      return;
+    }
+    els.announceList.innerHTML = list.map(function(a){
+      var cls = a.type === 'important' ? 'announce-item important' : 'announce-item';
+      var dateLabel = a.postedAt ? fmtRocCompact(a.postedAt) : '';
+      return '<div class="'+cls+'" data-id="'+escapeHtml(a.id)+'">' +
+          '<b>'+escapeHtml(a.title)+'</b>' +
+          (a.body ? '<p>'+escapeHtml(a.body)+'</p>' : '') +
+          (dateLabel ? '<span class="announce-date">'+dateLabel+'</span>' : '') +
+          '<span class="announce-actions">' +
+            '<button type="button" class="icon-x" data-edit-announce="'+escapeHtml(a.id)+'" aria-label="編輯公告">✎</button>' +
+            '<button type="button" class="icon-x" data-del-announce="'+escapeHtml(a.id)+'" aria-label="刪除公告">✕</button>' +
+          '</span>' +
+        '</div>';
+    }).join('');
+  }
+  els.announceList.addEventListener('click', function(e){
+    var editBtn = e.target.closest('[data-edit-announce]');
+    if(editBtn){
+      var a = state.announcements.find(function(x){ return x.id === editBtn.getAttribute('data-edit-announce'); });
+      if(a) openAnnounceModal(a);
+      return;
+    }
+    var delBtn = e.target.closest('[data-del-announce]');
+    if(delBtn){
+      var id = delBtn.getAttribute('data-del-announce');
+      if(confirm('確定要刪除這則公告嗎？')) removeAnnouncement(id);
+    }
+  });
+
+  // ---- 本月壽星：依員工管理「出生日期」欄位，彙整當月在職（含留職停薪，不含離職／外掛）員工的生日名單 ----
+  var BDAY_COLOR_CLS = ['c1','c2','c3'];
+  function renderBirthdays(){
+    var curMonth = today.getMonth() + 1;
+    var curDay = today.getDate();
+    var list = state.personnel.filter(function(p){
+      if(p.isExternal) return false;
+      if(p.status === 'inactive') return false;
+      if(!p.birthDate) return false;
+      var m = Number(p.birthDate.split('-')[1]);
+      return m === curMonth;
+    }).map(function(p){
+      var d = Number(p.birthDate.split('-')[2]);
+      return { p: p, day: d };
+    }).sort(function(a,b){ return a.day - b.day; });
+
+    if(state.personnelLoading){
+      els.birthdayList.innerHTML = '<div class="side-card-empty">載入中…</div>';
+      return;
+    }
+    if(list.length === 0){
+      els.birthdayList.innerHTML = '<div class="side-card-empty">本月沒有壽星。</div>';
+      return;
+    }
+    els.birthdayList.innerHTML = list.map(function(item, idx){
+      var p = item.p, day = item.day;
+      var diff = day - curDay;
+      var tagCls = 'upcoming', tagText = day+' 日';
+      if(diff === 0){ tagCls = 'today'; tagText = '今天🎂'; }
+      else if(diff === 1){ tagCls = 'soon'; tagText = '明天'; }
+      else if(diff > 1 && diff <= 7){ tagCls = 'soon'; tagText = diff+' 天後'; }
+      else if(diff < 0){ tagCls = 'upcoming'; tagText = (curMonth)+'/'+pad(day)+' 已過'; }
+      else { tagText = curMonth+'/'+pad(day); }
+      var colorCls = BDAY_COLOR_CLS[idx % BDAY_COLOR_CLS.length];
+      var initial = (p.name||'').slice(0,1);
+      var deptTitle = [p.title, normalizeDept(p.department)].filter(Boolean).join('．');
+      return '<div class="birthday-item">' +
+        '<span class="bday-avatar '+colorCls+'">'+escapeHtml(initial)+'</span>' +
+        '<span class="bday-info"><b>'+escapeHtml(p.name)+'</b><span>'+escapeHtml(deptTitle||'—')+'</span></span>' +
+        '<span class="bday-tag '+tagCls+'">'+escapeHtml(tagText)+'</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function daysRemaining(expiryDateStr){
+    if(!expiryDateStr) return null;
+    var parts = expiryDateStr.split('-').map(Number);
+    var exp = new Date(parts[0], parts[1]-1, parts[2]);
+    exp.setHours(0,0,0,0);
+    return Math.round((exp - today) / 86400000);
+  }
+
+  // ---- 年資計算：到職日 → 離職日（若已離職）或今天（若仍在職），回傳 {years, months} ----
+  function tenureBetween(hireIso, endIso){
+    if(!hireIso) return null;
+    var h = hireIso.split('-').map(Number);
+    var start = new Date(h[0], h[1]-1, h[2]);
+    var end;
+    if(endIso){
+      var e = endIso.split('-').map(Number);
+      end = new Date(e[0], e[1]-1, e[2]);
+    } else {
+      end = today;
+    }
+    if(end < start) return null; // 到職日在結束日之後，資料異常，不顯示年資
+    var years = end.getFullYear() - start.getFullYear();
+    var months = end.getMonth() - start.getMonth();
+    var days = end.getDate() - start.getDate();
+    if(days < 0) months--;
+    if(months < 0){ years--; months += 12; }
+    return { years: years, months: months };
+  }
+  function fmtTenure(p){
+    var endIso = (p.status === 'inactive' && p.departureDate) ? p.departureDate : '';
+    var t = tenureBetween(p.hireDate, endIso);
+    if(!t) return '';
+    if(t.years <= 0 && t.months <= 0) return '未滿1個月';
+    var parts = [];
+    if(t.years > 0) parts.push(t.years+'年');
+    if(t.months > 0) parts.push(t.months+'個月');
+    return parts.join('');
+  }
+  function statusOf(days){
+    if(days === null) return 'green';
+    if(days < 0) return 'red';
+    if(days <= ORANGE_DAYS) return 'orange';
+    if(days <= YELLOW_DAYS) return 'yellow';
+    return 'green';
+  }
+  var STATUS_TEXT = {red:'立即處理', orange:'優先處理', yellow:'即將到期', green:'正常', exempt:'免回訓'};
+
+  function enrich(c){
+    if(c.exempt){
+      return Object.assign({}, c, { daysRemaining: null, status: 'exempt' });
+    }
+    var d = daysRemaining(c.expiryDate);
+    return Object.assign({}, c, { daysRemaining: d, status: statusOf(d) });
+  }
+
+  // 「目前證照用於工地」的實際顯示值：僅採用證照自身登打的工地，
+  // 不與人員在「員工管理」指派的工地連動（派駐工地未必會使用該證照，兩者為各自獨立的資訊）。
+  function effectiveUsedWorksite(c){
+    return c.usedWorksite || '';
+  }
+
+  function escapeHtml(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(ch){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+    });
+  }
+
+  // 台灣手機號碼自動補上分隔線：10碼、09開頭時，轉成「0911-726769」格式；其餘格式（市話等）維持原輸入，不強制修改。
+  function formatTwPhone(raw){
+    var digits = String(raw||'').replace(/\D/g, '');
+    if(digits.length === 10 && digits.slice(0,2) === '09'){
+      return digits.slice(0,4) + '-' + digits.slice(4);
+    }
+    return String(raw||'').trim();
+  }
+
+  // ---------- pagination ----------
+  var PAGE_SIZE = 20; // 證照管理／員工管理列表：每頁固定 20 筆，超出自動分頁
+
+  // 依總筆數與目前頁碼，計算實際可用頁碼（自動夾在 1～總頁數之間，避免篩選或刪除後頁碼超出範圍）。
+  function clampPage(page, totalRows){
+    var totalPages = Math.max(1, Math.ceil(totalRows / PAGE_SIZE));
+    if(page < 1) return 1;
+    if(page > totalPages) return totalPages;
+    return page;
+  }
+
+  // 產生分頁列（上一頁／頁碼資訊／下一頁）；totalRows 為篩選後的總筆數，page 為目前頁碼（已 clamp 過）。
+  // onChange(newPage) 由呼叫端傳入，負責更新對應的 state 分頁欄位並重新渲染。
+  function renderPaginationBar(containerEl, page, totalRows, onChange){
+    if(!containerEl) return;
+    var totalPages = Math.max(1, Math.ceil(totalRows / PAGE_SIZE));
+    if(totalRows <= PAGE_SIZE){
+      containerEl.innerHTML = '';
+      return;
+    }
+    var startN = (page - 1) * PAGE_SIZE + 1;
+    var endN = Math.min(page * PAGE_SIZE, totalRows);
+    containerEl.innerHTML =
+      '<button type="button" class="btn small ghost" data-page-act="prev"'+(page<=1?' disabled':'')+'>‹ 上一頁</button>'+
+      '<span class="page-info">第 '+page+' / '+totalPages+' 頁・第 '+startN+'–'+endN+' 筆，共 '+totalRows+' 筆</span>'+
+      '<button type="button" class="btn small ghost" data-page-act="next"'+(page>=totalPages?' disabled':'')+'>下一頁 ›</button>';
+    var prevBtn = containerEl.querySelector('[data-page-act="prev"]');
+    var nextBtn = containerEl.querySelector('[data-page-act="next"]');
+    if(prevBtn) prevBtn.addEventListener('click', function(){ if(page>1) onChange(page-1); });
+    if(nextBtn) nextBtn.addEventListener('click', function(){ if(page<totalPages) onChange(page+1); });
+  }
+
+  // ---------- rendering ----------
+
+  function render(){
+    var enriched = state.certs.map(enrich);
+
+    var counts = {all: enriched.length, red:0, orange:0, yellow:0, green:0, exempt:0};
+    enriched.forEach(function(c){ counts[c.status]++; });
+    renderTiles(counts);
+
+    // filter
+    var q = state.search.trim().toLowerCase();
+    var rows = enriched.filter(function(c){
+      if(state.filterStatus !== 'all' && c.status !== state.filterStatus) return false;
+      if(q){
+        var hay = [c.name, c.certType, c.title, effectiveUsedWorksite(c)].join(' ').toLowerCase();
+        if(hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+
+    // sort — 管理級人員優先（依職稱層級），其次才是使用者選的欄位，最後以姓名分組
+    // （依姓名排序時改以急迫程度做次要排序；其餘欄位則以姓名做次要排序）。
+    // 例外：依「證照 / 資格名稱」排序時，不套用職稱層級鎖定，讓同類別證照能確實排列在一起。
+    var f = state.sortField, dir = state.sortDir === 'asc' ? 1 : -1;
+    var secField = (f === 'name') ? 'daysRemaining' : 'name';
+    function norm(field, v){
+      if(field === 'daysRemaining') return v===null ? Infinity : v;
+      if(typeof v === 'string') return v.toLowerCase();
+      return v;
+    }
+    rows.sort(function(a,b){
+      if(f !== 'certType'){
+        var ar = titleRank(a.title), br = titleRank(b.title);
+        if(ar !== br) return ar - br;
+      }
+      var av = norm(f, a[f]), bv = norm(f, b[f]);
+      if(av < bv) return -1*dir;
+      if(av > bv) return 1*dir;
+      var av2 = norm(secField, a[secField]), bv2 = norm(secField, b[secField]);
+      if(av2 < bv2) return -1;
+      if(av2 > bv2) return 1;
+      return 0;
+    });
+
+    // group same person's rows together for display: a stable regroup pass that keeps
+    // each person's first (highest-priority, per the sort above) row as the group's
+    // position, and pulls the rest of that person's rows up next to it — so sorting by
+    // any column still clusters one person's multiple certificates visually.
+    rows = groupRowsByPerson(rows);
+
+    // 分頁：每頁固定 20 筆，畫面只渲染目前頁碼的子集，但匯出 CSV 仍以篩選後的「全部」筆數為準。
+    state.certsPage = clampPage(state.certsPage, rows.length);
+    var certsPageRows = rows.slice((state.certsPage - 1) * PAGE_SIZE, state.certsPage * PAGE_SIZE);
+
+    renderTable(certsPageRows);
+    renderPaginationBar(document.getElementById('certsPagination'), state.certsPage, rows.length, function(p){
+      state.certsPage = p;
+      render();
+    });
+    updateSortArrows();
+    els.exportBtn.hidden = !downloadsApi;
+    window._exportRows = rows;
+    if(!document.getElementById('panel-home').hidden) renderHome();
+  }
+
+  function renderTiles(counts){
+    var defs = [
+      {key:'all', label:'全部證照', cls:'all'},
+      {key:'red', label:'立即處理', cls:'red'},
+      {key:'orange', label:'優先處理', cls:'orange'},
+      {key:'yellow', label:'即將到期', cls:'yellow'},
+      {key:'green', label:'正常', cls:'green'},
+      {key:'exempt', label:'免回訓', cls:'exempt'}
+    ];
+    els.tiles.innerHTML = defs.map(function(d){
+      var active = state.filterStatus === d.key;
+      return '<button type="button" class="tile '+d.cls+'" data-status="'+d.key+'" data-active="'+active+'">'+
+        '<span class="label"><span class="dot"></span>'+d.label+'</span>'+
+        '<span class="count num">'+counts[d.key]+'</span>'+
+      '</button>';
+    }).join('');
+    Array.prototype.forEach.call(els.tiles.querySelectorAll('.tile'), function(btn){
+      btn.addEventListener('click', function(){
+        var s = btn.getAttribute('data-status');
+        state.filterStatus = (state.filterStatus === s) ? 'all' : s;
+        state.certsPage = 1;
+        render();
+      });
+    });
+  }
+
+  function personGroupKey(c){
+    return c.personnelId ? ('id:'+c.personnelId) : ('name:'+(c.name||'').trim().toLowerCase());
+  }
+
+  function groupRowsByPerson(rows){
+    var order = [], groups = {};
+    rows.forEach(function(c){
+      var key = personGroupKey(c);
+      if(!groups[key]){ groups[key] = []; order.push(key); }
+      groups[key].push(c);
+    });
+    // 同一人員底下的多筆證照，一律依「發證日期」由新到舊排序，方便一眼看出最新持有的證照；
+    // 未填發證日期者視為最舊，排在該人員群組的最後面。
+    order.forEach(function(key){
+      groups[key].sort(function(a,b){
+        var av = a.issueDate || '', bv = b.issueDate || '';
+        if(av === bv) return 0;
+        return av < bv ? 1 : -1;
+      });
+    });
+    var grouped = [];
+    order.forEach(function(key){ grouped.push.apply(grouped, groups[key]); });
+    return grouped;
+  }
+
+  function renderTable(rows){
+    if(state.loading){
+      return; // keep skeleton until first data arrives
+    }
+    if(rows.length === 0){
+      els.tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state">' +
+        (state.certs.length === 0 ? '尚無證照資料，點右上「＋ 新增證照」開始建立紀錄。' : '沒有符合篩選條件的證照。') +
+        '</div></td></tr>';
+      return;
+    }
+    var prevKey = null;
+    var colorIdx = -1; // 每遇到新的人就往下一色前進，3 色循環（見 CSS .cert-c1/c2/c3）
+    els.tbody.innerHTML = rows.map(function(c, idx){
+      var pillCls = c.status;
+      var key = personGroupKey(c);
+      var isGroupStart = (key !== prevKey);
+      var nextKey = (idx+1 < rows.length) ? personGroupKey(rows[idx+1]) : null;
+      var isGroupEnd = (key !== nextKey);
+      prevKey = key;
+      if(isGroupStart) colorIdx = (colorIdx + 1) % 3;
+      // 同一人多張證照：每列仍各自完整呈現姓名／職稱等欄位（不合併儲存格，維持逐列可編輯、排序的簡單結構），
+      // 不再顯示「共 N 張證照」文字，僅以「顏色圖塊」（淡底色＋外框，3 色循環）整組框起，一眼區隔不同人。
+      var nameCell = '<td class="name-cell"><b>'+escapeHtml(c.name)+'</b>'+
+        (c.title?'<span>'+escapeHtml(c.title)+'</span>':'')+
+      '</td>';
+      var groupCls = ' cert-block cert-c'+(colorIdx+1) + (isGroupStart?' cert-block-start':'') + (isGroupEnd?' cert-block-end':'');
+      var trCls = 's-'+c.status + groupCls;
+      return '<tr class="'+trCls+'" data-id="'+escapeHtml(c.id)+'">'+
+        '<td><span class="pill '+pillCls+'"><i></i></span></td>'+
+        nameCell +
+        '<td><button type="button" class="cert-type-link" data-filter-certtype="'+escapeHtml(c.certType)+'" title="依證照類別排序，讓同類別排列在一起">'+escapeHtml(c.certType)+'</button></td>'+
+        '<td>'+(effectiveUsedWorksite(c) ? '🏗 '+escapeHtml(effectiveUsedWorksite(c)) : '<span class="muted">—</span>')+'</td>'+
+        '<td class="muted num">'+escapeHtml(fmtRocCompact(c.issueDate))+'</td>'+
+        '<td class="muted num">'+escapeHtml(fmtRocCompact(c.lastRetrainDate))+'</td>'+
+        '<td class="num">'+(c.status==='exempt' ? '<span class="muted">無到期限制</span>' : escapeHtml(fmtRocCompact(c.expiryDate)))+'</td>'+
+        '<td><button type="button" class="pill '+pillCls+' status-filter-btn" data-filter-status="'+c.status+'" title="篩選相同狀態">'+STATUS_TEXT[c.status]+'</button></td>'+
+        '<td class="notes-cell">'+(c.notes ? escapeHtml(c.notes) : '<span class="muted">—</span>')+'</td>'+
+        '<td><div class="row-actions">'+
+          '<button class="btn small ghost" data-act="edit" data-id="'+escapeHtml(c.id)+'">編輯</button>'+
+          '<button class="btn small ghost" data-act="delete" data-id="'+escapeHtml(c.id)+'">刪除</button>'+
+        '</div></td>'+
+      '</tr>';
+    }).join('');
+  }
+
+  function updateSortArrows(){
+    Array.prototype.forEach.call(document.querySelectorAll('th[data-sort]'), function(th){
+      var arrow = th.querySelector('.arrow');
+      if(th.getAttribute('data-sort') === state.sortField){
+        arrow.textContent = state.sortDir === 'asc' ? '▲' : '▼';
+      } else {
+        arrow.textContent = '';
+      }
+    });
+  }
+
+  // ---------- personnel rendering ----------
+
+  var STATUS_LABEL = {active:'在職', leave:'留職停薪', inactive:'離職'};
+  // 主管職稱圖塊顏色（僅員工管理列表使用，其餘職稱維持原本純文字顯示）。
+  var TITLE_BADGE_CLASS = {'總經理':'tb-gm', '副總經理':'tb-vgm', '協理':'tb-ad', '襄理':'tb-am', '經理':'tb-mgr'};
+
+  // 計算某位人員目前掛在證照管理下的證照張數：優先以 personnelId 連結比對，
+  // 舊資料／手動輸入（無 personnelId）則以姓名比對（與證照管理的分組邏輯一致）。
+  function certCountForPerson(p){
+    var pname = (p.name||'').trim().toLowerCase();
+    return state.certs.filter(function(c){
+      if(c.personnelId) return c.personnelId === p.id;
+      return (c.name||'').trim().toLowerCase() === pname;
+    }).length;
+  }
+
+  function certsForPerson(p){
+    var pname = (p.name||'').trim().toLowerCase();
+    return state.certs.filter(function(c){
+      if(c.personnelId) return c.personnelId === p.id;
+      return (c.name||'').trim().toLowerCase() === pname;
+    });
+  }
+
+  // 員工離職時呼叫：清除證照管理中屬於此人的所有證照紀錄，僅保留員工管理的人事紀錄。
+  function deleteCertsForPerson(p){
+    var matches = certsForPerson(p);
+    if(matches.length === 0) return Promise.resolve();
+    if(state.dbMode === 'live' && col){
+      return Promise.all(matches.map(function(c){
+        return col.doc(c.id).delete().catch(function(){ /* ignore */ });
+      }));
+    }
+    var ids = matches.map(function(c){ return c.id; });
+    state.certs = state.certs.filter(function(c){ return ids.indexOf(c.id) === -1; });
+    render();
+    return Promise.resolve();
+  }
+
+  // 員工基本資料異動時（例如姓名、職稱修正）呼叫：將證照管理中已用 personnelId 連結此人的證照紀錄，
+  // 其快取的姓名／職稱欄位同步更新為員工管理目前的最新資料，避免證照管理仍顯示修正前的舊姓名／職稱。
+  // 僅處理有 personnelId 連結的證照（可確定歸屬對象）；沒有連結、僅以姓名比對的舊資料／手動輸入證照不在此自動同步範圍內。
+  function syncPersonCertsCachedInfo(p){
+    var matches = state.certs.filter(function(c){ return c.personnelId === p.id; });
+    var stale = matches.filter(function(c){ return c.name !== p.name || (c.title||'') !== (p.title||''); });
+    if(stale.length === 0) return Promise.resolve();
+    if(state.dbMode === 'live' && col){
+      return Promise.all(stale.map(function(c){
+        return col.doc(c.id).update({ name: p.name, title: p.title||'' }).catch(function(){ /* ignore */ });
+      }));
+    }
+    stale.forEach(function(c){ c.name = p.name; c.title = p.title||''; });
+    render();
+    return Promise.resolve();
+  }
+
+  // 全域一致性檢查：掃描所有員工，確保證照管理中每筆已連結的證照，其姓名／職稱快取都與員工管理目前資料一致；
+  // 除了編輯人員存檔時即時同步之外，這裡也會在資料載入／更新時（含舊資料、外部/離線資料同步）自動掃描並修正。
+  function syncAllCertsCachedInfo(){
+    if(state.personnelLoading || state.loading) return;
+    state.personnel.forEach(function(p){
+      syncPersonCertsCachedInfo(p);
+    });
+  }
+
+  // 全域一致性檢查：只要員工管理裡的在職狀態是「離職」，就不應該在證照管理留下任何證照紀錄。
+  // 除了在編輯人員時即時清除之外，這裡也會在資料載入／更新時（含舊資料、外部/離線資料同步）自動掃描並清除，
+  // 確保無論證照是何時被加入的，只要對應人員目前是離職狀態，證照管理都不會殘留其紀錄；員工管理的人事紀錄本身不受影響。
+  function syncInactiveCertsCleanup(){
+    if(state.personnelLoading || state.loading) return;
+    state.personnel.forEach(function(p){
+      if(p.status === 'inactive' && certsForPerson(p).length > 0){
+        deleteCertsForPerson(p);
+      }
+    });
+  }
+
+  // 全域一致性檢查（名冊交叉比對）：確保證照管理中出現過的每一位人員，在員工管理都能找到對應的一筆人員紀錄，
+  // 讓「員工管理」名冊與「證照管理」的人員名單保持一致，不會有證照掛在員工管理查無此人的姓名下。
+  // 作法：掃描所有尚未以 personnelId 連結到現有人員的證照，依姓名分組後，
+  //   1) 若員工管理已有同姓名的人員，直接將證照連結過去；
+  //   2) 若查無此人，則在員工管理自動新增一筆「外掛人員」紀錄（僅姓名與職稱，無基本資料／聯絡資訊／公司資料），
+  //      再將證照連結過去——之後使用者可自行於員工管理打開該人員補齊基本資料、取消外掛人員勾選。
+  // 具備冪等性：同一批證照重複掃描不會重複建立人員或重複連結；以佇列逐一處理，避免同姓名多筆證照並行建立出重複人員。
+  var certPeopleReconcileRunning = false;
+  function reconcileCertPeopleWithPersonnel(){
+    if(certPeopleReconcileRunning) return;
+    if(state.personnelLoading || state.loading) return;
+    var unlinked = state.certs.filter(function(c){
+      if(!c.name || !String(c.name).trim()) return false;
+      if(!c.personnelId) return true;
+      return !state.personnel.some(function(p){ return p.id === c.personnelId; });
+    });
+    if(unlinked.length === 0) return;
+
+    var order = [], groups = {};
+    unlinked.forEach(function(c){
+      var key = String(c.name).trim().toLowerCase();
+      if(!groups[key]){ groups[key] = []; order.push(key); }
+      groups[key].push(c);
+    });
+    if(order.length === 0) return;
+
+    certPeopleReconcileRunning = true;
+
+    function findExistingPersonByKey(key){
+      return state.personnel.find(function(p){ return String(p.name||'').trim().toLowerCase() === key; });
+    }
+
+    function processNext(i){
+      if(i >= order.length){ certPeopleReconcileRunning = false; return; }
+      var key = order[i];
+      var groupCerts = groups[key];
+      var existing = findExistingPersonByKey(key);
+      var linkPromise;
+      if(existing){
+        linkPromise = Promise.all(groupCerts.map(function(c){
+          return saveCert(c.id, { personnelId: existing.id }, false);
+        }));
+      } else {
+        var sample = groupCerts[0];
+        linkPromise = savePersonnel(null, {
+          name: sample.name,
+          isExternal: true,
+          title: sample.title || '',
+          status: 'active',
+          updatedAt: new Date().toISOString()
+        }, true).then(function(newId){
+          return Promise.all(groupCerts.map(function(c){
+            return saveCert(c.id, { personnelId: newId }, false);
+          }));
+        });
+      }
+      linkPromise.then(function(){ processNext(i+1); }).catch(function(){ processNext(i+1); });
+    }
+    processNext(0);
+  }
+
+  // 「人力分配」面板：新增／編輯人員時只要選了「部門」，就會直接歸入對應的公司部門分組，
+  // 不必另外指派工地案場——工地案場欄位保留給「目前實際派駐某工地專案」的人員，屬選填的額外資訊。
+  // 因此：有指派工地案場者，依工地案場分組（維持原有專案人力視角）；其餘人員一律依「部門」分組，
+  // 不再統一塞進單一「未指派工地」清單。
+  function renderWorksitePanel(){
+    var wrap = document.getElementById('worksiteGroups');
+    if(!wrap) return;
+    var active = state.personnel.filter(function(p){ return (p.status||'active') !== 'inactive'; });
+    var siteGroups = {};
+    var deptGroups = {};
+    active.forEach(function(p){
+      if(p.worksite){
+        (siteGroups[p.worksite] = siteGroups[p.worksite] || []).push(p);
+      } else {
+        var dept = normalizeDept(p.department) || '未設定部門';
+        (deptGroups[dept] = deptGroups[dept] || []).push(p);
+      }
+    });
+    // 同一分組內的人力，依「職務層級」（TITLE_PRESETS 順序，如總經理／經理／主任／工程師…）由高到低排序，
+    // 未列於清單中的職稱排在最後；同層級者再依姓名排序，確保顯示順序穩定。
+    function byRank(a, b){
+      var ra = titleRank(a.title), rb = titleRank(b.title);
+      if(ra !== rb) return ra - rb;
+      return String(a.name||'').localeCompare(String(b.name||''));
+    }
+    Object.keys(siteGroups).forEach(function(site){ siteGroups[site].sort(byRank); });
+    Object.keys(deptGroups).forEach(function(dept){ deptGroups[dept].sort(byRank); });
+    var siteNames = Object.keys(siteGroups).sort(function(a,b){
+      var ia = WORKSITE_PANEL_SITE_ORDER.indexOf(a); if(ia === -1) ia = 999;
+      var ib = WORKSITE_PANEL_SITE_ORDER.indexOf(b); if(ib === -1) ib = 999;
+      if(ia !== ib) return ia - ib;
+      return a.localeCompare(b);
+    });
+    // 人力分配面板的部門顯示順序：管理部置頂，依序採購部、工務部（與新增人員表單「部門」下拉選單
+    // 的預設順序 DEPARTMENT_PRESETS 各自獨立，互不影響）。
+    var deptNames = Object.keys(deptGroups).sort(function(a,b){
+      var ia = WORKSITE_PANEL_DEPT_ORDER.indexOf(a); if(ia === -1) ia = 999;
+      var ib = WORKSITE_PANEL_DEPT_ORDER.indexOf(b); if(ib === -1) ib = 999;
+      if(ia !== ib) return ia - ib;
+      return a.localeCompare(b);
+    });
+
+    if(siteNames.length === 0 && deptNames.length === 0){
+      wrap.innerHTML = '<div class="empty-state">尚無在職人員資料。請先至「員工管理」新增人員。</div>';
+      return;
+    }
+
+    function memberRow(p, clickable){
+      var deptDisp = normalizeDept(p.department);
+      var titleBadgeCls = p.title ? TITLE_BADGE_CLASS[p.title] : null;
+      var titlePart = p.title
+        ? (titleBadgeCls ? '<span class="title-badge '+titleBadgeCls+'">'+escapeHtml(p.title)+'</span>' : escapeHtml(p.title))
+        : '—';
+      var deptPart = deptDisp ? (titleBadgeCls ? ' '+escapeHtml(deptDisp) : '．'+escapeHtml(deptDisp)) : '';
+      var line2 = titlePart + deptPart;
+      var line3 = p.phone ? '<span class="muted">'+escapeHtml(p.phone)+'</span>' : '';
+      var nameCell = '<b>'+escapeHtml(p.name)+(p.isExternal ? '<span class="ext-badge">外掛</span>' : '')+'</b>';
+      var cls = 'worksite-member' + (p.isExternal ? ' external' : '');
+      if(clickable){
+        return '<button type="button" class="'+cls+'" data-goto-emp="'+escapeHtml(p.id)+'">'+
+          nameCell+'<span>'+line2+'</span>'+line3+
+        '</button>';
+      }
+      return '<span class="'+cls+' static">'+nameCell+'<span>'+line2+'</span>'+line3+'</span>';
+    }
+
+    // 顯示順序：公司部門（管理部置頂、依序採購部、工務部）在上，工地案場分組在下。
+    var html = deptNames.map(function(dept){
+      var members = deptGroups[dept];
+      return '<div class="worksite-card worksite-dept">'+
+        '<div class="worksite-card-head"><b>🏢 '+escapeHtml(dept)+'</b><span class="pill exempt">'+members.length+' 人</span></div>'+
+        '<div class="worksite-member-list">'+ members.map(function(p){ return memberRow(p, true); }).join('') +'</div>'+
+      '</div>';
+    }).join('');
+
+    html += siteNames.map(function(site){
+      var members = siteGroups[site];
+      return '<div class="worksite-card">'+
+        '<div class="worksite-card-head"><b>🏗 '+escapeHtml(site)+'</b><span class="pill exempt">'+members.length+' 人</span></div>'+
+        '<div class="worksite-member-list">'+ members.map(function(p){ return memberRow(p, true); }).join('') +'</div>'+
+      '</div>';
+    }).join('');
+
+    wrap.innerHTML = html;
+    Array.prototype.forEach.call(wrap.querySelectorAll('[data-goto-emp]'), function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.getAttribute('data-goto-emp');
+        var p = state.personnel.find(function(x){ return x.id === id; });
+        switchPanel('employees');
+        if(p) openPersonnelModal(p);
+      });
+    });
+  }
+
+  // 「人事薪資」模組規劃結構（尚未開放實際填寫／計算，僅供瀏覽目前規劃的功能範圍）
+  var PAYROLL_STRUCTURE = [
+    { no:'①', title:'薪資基本資料', items:['薪資類別','本薪','固定津貼','薪資帳戶'] },
+    { no:'②', title:'每月薪資', items:['本薪','獎金','其他收入'] },
+    { no:'③', title:'加班／津貼', items:['加班費','津貼'] },
+    { no:'④', title:'扣款', items:['勞保','健保','勞退自提','所得稅','其他扣款'] },
+    { no:'⑤', title:'年度考核', items:['考核表（工程師）','考核表（事務員）','考核表（長僱工）'] },
+    { no:'⑥', title:'考核調薪', items:['考核等級對照表','薪資異動提報表'], gradeTable:[
+      { score:'90～100', grade:'A', raise:'3%～6%' },
+      { score:'80～89', grade:'B', raise:'2%～4%' },
+      { score:'70～79', grade:'C', raise:'0%～2%' },
+      { score:'60～69', grade:'D', raise:'原則不調薪' },
+      { score:'59以下', grade:'E', raise:'原則不調薪／改善' }
+    ] },
+    { no:'⑦', title:'薪資異動歷史', items:['升遷','職務異動'] },
+    { no:'⑧', title:'薪資報表', items:['個人薪資單','月薪資表','年度薪資統計','加班費統計','人事成本統計'] }
+  ];
+
+  // 「人事薪資」為高度敏感資料，比照獨立於其他模組的存取限制：進入此模組須另外輸入密碼。
+  // 注意：本系統目前沒有帳號／登入機制，此密碼鎖僅為前端簡易門檻，用來避免一般使用者不小心點入，
+  // 並非真正的伺服器端權限控管（技術上仍可透過檢視原始碼取得密碼），日後如導入登入機制應以正式權限管理取代。
+  var PAYROLL_PIN = '64984250';
+
+  function tryUnlockPayroll(){
+    var input = document.getElementById('payrollPinInput');
+    var errEl = document.getElementById('payrollPinError');
+    if((input.value||'').trim() === PAYROLL_PIN){
+      state.payrollUnlocked = true;
+      input.value = '';
+      errEl.style.display = 'none';
+      renderPayrollPanel();
+    } else {
+      errEl.textContent = '密碼錯誤，請重新輸入。';
+      errEl.style.display = 'block';
+    }
+  }
+  document.getElementById('payrollUnlockBtn').addEventListener('click', tryUnlockPayroll);
+  document.getElementById('payrollPinInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); tryUnlockPayroll(); }
+  });
+
+  function renderPayrollPanel(){
+    var lockedEl = document.getElementById('payrollLocked');
+    var contentEl = document.getElementById('payrollContent');
+    if(!lockedEl || !contentEl) return;
+    if(!state.payrollUnlocked){
+      lockedEl.hidden = false;
+      contentEl.hidden = true;
+      return;
+    }
+    lockedEl.hidden = true;
+    contentEl.hidden = false;
+    var wrap = document.getElementById('payrollStructure');
+    wrap.innerHTML = PAYROLL_STRUCTURE.map(function(sec){
+      var itemsHtml = sec.items.length
+        ? sec.items.map(function(it){ return '<span class="payroll-item">'+escapeHtml(it)+'</span>'; }).join('')
+        : '<span class="muted" style="font-size:14.5px;">細項規劃中</span>';
+      var tableHtml = '';
+      if(sec.gradeTable && sec.gradeTable.length){
+        tableHtml = '<table class="payroll-mini-table"><thead><tr><th>考核總分</th><th>等第</th><th>調薪幅度</th></tr></thead><tbody>'+
+          sec.gradeTable.map(function(r){
+            return '<tr><td>'+escapeHtml(r.score)+'</td><td>'+escapeHtml(r.grade)+'</td><td>'+escapeHtml(r.raise)+'</td></tr>';
+          }).join('') +
+        '</tbody></table>';
+      }
+      return '<div class="payroll-card">'+
+        '<div class="payroll-card-head"><b>'+sec.no+' '+escapeHtml(sec.title)+'</b><span class="pill exempt">規劃中</span></div>'+
+        '<div class="payroll-item-list">'+itemsHtml+'</div>'+
+        tableHtml+
+      '</div>';
+    }).join('');
+  }
+
+  function renderPersonnel(){
+    var q = state.personnelSearch.trim().toLowerCase();
+    var rows = state.personnel.filter(function(p){
+      // 「僅在職／僅留職停薪／僅離職」三種篩選僅適用於正式員工的在職狀態分類；外掛人員不屬於在職狀態
+      // 分類（在職狀態欄一律只顯示「外掛」，見前次調整），一律不出現在這三種篩選結果中，僅「全部人員」
+      // 才會顯示外掛人員，確保與首頁「在職人數」等統計數字口徑一致。
+      if(state.personnelStatusFilter !== 'all'){
+        if(p.isExternal) return false;
+        if((p.status||'active') !== state.personnelStatusFilter) return false;
+      }
+      if(q){
+        var hay = [p.name, p.title, normalizeDept(p.department), p.worksite].join(' ').toLowerCase();
+        if(hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+
+    var f = state.personnelSortField, dir = state.personnelSortDir === 'asc' ? 1 : -1;
+    function norm(v){ return typeof v === 'string' ? v.toLowerCase() : (v==null ? '' : v); }
+    function fieldVal(p, field){
+      // 職稱排序：總經理／副總經理／協理／經理／襄理維持職務層級排序；襄理以下（含未列於清單的
+      // 職稱）一律視為同一層級，改依「報到時間」（到職日期）排序，尚未填寫到職日期者排在最後。
+      if(field === 'titleRank'){
+        var rank = titleRank(p.title);
+        var capped = rank <= 4 ? rank : 5;
+        var hireKey = p.hireDate || '9999-99-99';
+        return capped + '_' + hireKey;
+      }
+      if(field === 'tenureMonths'){
+        var t = tenureBetween(p.hireDate, (p.status==='inactive' && p.departureDate) ? p.departureDate : '');
+        return t ? (t.years*12 + t.months) : -1;
+      }
+      // 「在職狀態」欄位本身的排序依據：在職(0)／留職停薪(1)／離職(2)，依此數值排序，
+      // 才能讓點選此欄位時的升冪／降冪確實反轉顯示順序。
+      if(field === 'status') return statusTier(p);
+      return p[field];
+    }
+    // 在職狀態優先順序：在職 → 留職停薪 → 離職，離職人員一律排在最下層，不受欄位排序影響；
+    // 在同一在職狀態內才依選定欄位排序。但直接點選「在職狀態」欄位排序時，此欄本身就是排序依據，
+    // 不套用這個固定置底規則，才能讓升冪／降冪確實反轉順序。
+    function statusTier(p){ return p.status === 'inactive' ? 2 : (p.status === 'leave' ? 1 : 0); }
+    rows.sort(function(a,b){
+      if(f !== 'status'){
+        var aInactive = statusTier(a), bInactive = statusTier(b);
+        if(aInactive !== bInactive) return aInactive - bInactive;
+      }
+      var av = norm(fieldVal(a,f)), bv = norm(fieldVal(b,f));
+      if(av < bv) return -1*dir;
+      if(av > bv) return 1*dir;
+      var an = norm(a.name), bn = norm(b.name);
+      if(an < bn) return -1;
+      if(an > bn) return 1;
+      return 0;
+    });
+
+    // 分頁：每頁固定 20 筆，畫面只渲染目前頁碼的子集，但匯出 CSV 仍以篩選後的「全部」筆數為準。
+    state.personnelPage = clampPage(state.personnelPage, rows.length);
+    var personnelPageRows = rows.slice((state.personnelPage - 1) * PAGE_SIZE, state.personnelPage * PAGE_SIZE);
+
+    renderPersonnelTable(personnelPageRows);
+    renderPaginationBar(document.getElementById('personnelPagination'), state.personnelPage, rows.length, function(p){
+      state.personnelPage = p;
+      renderPersonnel();
+    });
+    updatePersonnelSortArrows();
+    els.personnelExportBtn.hidden = !downloadsApi;
+    window._exportPersonnelRows = rows;
+    if(!document.getElementById('panel-home').hidden) renderHome();
+    if(!document.getElementById('panel-worksite').hidden) renderWorksitePanel();
+    populateEmployeeSelect();
+    updateMergeDuplicatesBtnUI();
+  }
+
+  // 重複人員合併：同姓名（去除前後空白、不分大小寫）視為同一人的多筆紀錄。
+  // 完整度計分只看基本資料欄位，外掛人員一律無此類欄位，分數固定最低，除非兩筆都是外掛人員。
+  function personnelCompletenessScore(p){
+    if(p.isExternal) return -1;
+    var fields = ['idNumber','gender','bloodType','birthDate','hireDate','phone','email','address','emergencyName','emergencyPhone','department','title','worksite'];
+    var score = 0;
+    fields.forEach(function(f){ if(p[f] && String(p[f]).trim()) score++; });
+    return score;
+  }
+
+  function findDuplicatePersonnelGroups(){
+    var order = [], groups = {};
+    state.personnel.forEach(function(p){
+      var key = (p.name||'').trim().toLowerCase();
+      if(!key) return;
+      if(!groups[key]){ groups[key] = []; order.push(key); }
+      groups[key].push(p);
+    });
+    var result = [];
+    order.forEach(function(key){
+      var list = groups[key];
+      if(list.length < 2) return;
+      var sorted = list.slice().sort(function(a,b){
+        var sa = personnelCompletenessScore(a), sb = personnelCompletenessScore(b);
+        if(sa !== sb) return sb - sa;
+        var aActive = a.status !== 'inactive' ? 1 : 0, bActive = b.status !== 'inactive' ? 1 : 0;
+        if(aActive !== bActive) return bActive - aActive;
+        var ah = a.hireDate || '9999-99-99', bh = b.hireDate || '9999-99-99';
+        if(ah !== bh) return ah < bh ? -1 : 1;
+        var ac = a.createdAt || '', bc = b.createdAt || '';
+        if(ac !== bc) return ac < bc ? -1 : 1;
+        return 0;
+      });
+      result.push({ primary: sorted[0], duplicates: sorted.slice(1) });
+    });
+    return result;
+  }
+
+  // 只刪除人員紀錄本身，不連動清除證照（合併時證照已明確轉移到保留的那一筆，避免誤刪剛轉移過去的證照）。
+  function deletePersonnelRecordOnly(p){
+    var id = p.id;
+    if(state.dbMode === 'live' && personnelCol){
+      return personnelCol.doc(id).delete().catch(function(){ /* ignore */ });
+    }
+    state.personnel = state.personnel.filter(function(x){ return x.id !== id; });
+    return Promise.resolve();
+  }
+
+  function mergeDuplicatePersonnel(){
+    var groups = findDuplicatePersonnelGroups();
+    if(groups.length === 0) return Promise.resolve();
+    var relinkTasks = [];
+    groups.forEach(function(g){
+      g.duplicates.forEach(function(dup){
+        state.certs.filter(function(c){ return c.personnelId === dup.id; }).forEach(function(c){
+          relinkTasks.push(saveCert(c.id, { personnelId: g.primary.id }, false));
+        });
+      });
+    });
+    return Promise.all(relinkTasks).then(function(){
+      var deleteTasks = [];
+      groups.forEach(function(g){
+        g.duplicates.forEach(function(dup){ deleteTasks.push(deletePersonnelRecordOnly(dup)); });
+      });
+      return Promise.all(deleteTasks);
+    }).then(function(){
+      renderPersonnel();
+    });
+  }
+
+  function updateMergeDuplicatesBtnUI(){
+    var btn = els.personnelMergeDuplicatesBtn;
+    if(!btn) return;
+    var groups = findDuplicatePersonnelGroups();
+    btn.hidden = groups.length === 0;
+    if(btn.dataset.armed !== '1'){
+      btn.textContent = '合併重複人員（' + groups.length + ' 組）';
+    }
+  }
+
+  els.personnelMergeDuplicatesBtn.addEventListener('click', function(){
+    var btn = els.personnelMergeDuplicatesBtn;
+    var groups = findDuplicatePersonnelGroups();
+    if(groups.length === 0) return;
+    if(btn.dataset.armed === '1'){
+      btn.dataset.armed = '0';
+      btn.classList.remove('danger-arm');
+      btn.disabled = true;
+      mergeDuplicatePersonnel().then(function(){
+        btn.disabled = false;
+        updateMergeDuplicatesBtnUI();
+      });
+    } else {
+      btn.dataset.armed = '1';
+      btn.textContent = '確認合併這 ' + groups.length + ' 組重複人員？';
+      btn.classList.add('danger-arm');
+      setTimeout(function(){
+        if(btn.isConnected && btn.dataset.armed === '1'){
+          btn.dataset.armed = '0';
+          btn.classList.remove('danger-arm');
+          updateMergeDuplicatesBtnUI();
+        }
+      }, 3000);
+    }
+  });
+
+  function renderPersonnelTable(rows){
+    if(state.personnelLoading){ return; }
+    if(rows.length === 0){
+      els.personnelTbody.innerHTML = '<tr><td colspan="11"><div class="empty-state">' +
+        (state.personnel.length === 0 ? '尚無人員資料，點右上「＋ 新增人員」開始建立紀錄。' : '沒有符合篩選條件的人員。') +
+        '</div></td></tr>';
+      return;
+    }
+    els.personnelTbody.innerHTML = rows.map(function(p){
+      var st = p.status === 'inactive' ? 'inactive' : (p.status === 'leave' ? 'leave' : 'active');
+      var pillCls = st === 'active' ? 'green' : (st === 'leave' ? 'yellow' : 'exempt');
+      // 外掛人員非正式在職人員，不適用在職／留職停薪／離職的在職狀態分類，此欄一律只顯示「外掛」。
+      // 留職停薪起始日／原因不另外佔用欄位顯示，改以滑鼠提示（title）附加在「留職停薪」徽章上。
+      var leaveTitleParts = [];
+      if(st==='leave' && p.leaveStartDate) leaveTitleParts.push('起始日：'+fmtRocCompact(p.leaveStartDate));
+      if(st==='leave' && p.leaveReason) leaveTitleParts.push('原因：'+p.leaveReason);
+      var leaveTitleAttr = leaveTitleParts.length ? ' title="'+escapeHtml(leaveTitleParts.join('，'))+'"' : '';
+      var statusCell = p.isExternal
+        ? '<span class="pill exempt"><i></i>外掛</span>'
+        : '<span class="pill '+pillCls+'"'+leaveTitleAttr+'><i></i>'+STATUS_LABEL[st]+'</span>';
+      var deptCell;
+      var deptDisp = normalizeDept(p.department);
+      if(deptDisp && p.worksite){
+        deptCell = '<b>'+escapeHtml(deptDisp)+'</b><span>🏗 '+escapeHtml(p.worksite)+'</span>';
+      } else if(deptDisp){
+        deptCell = escapeHtml(deptDisp);
+      } else if(p.worksite){
+        deptCell = '<span class="muted">—</span><span>🏗 '+escapeHtml(p.worksite)+'</span>';
+      } else {
+        deptCell = '<span class="muted">—</span>';
+      }
+      var contact = [];
+      if(p.phone) contact.push('<b>'+escapeHtml(p.phone)+'</b>');
+      if(p.email) contact.push('<span>'+escapeHtml(p.email)+'</span>');
+      var emergency = [];
+      if(p.emergencyName || p.emergencyPhone || p.emergencyRelation){
+        emergency.push('<b>'+escapeHtml(p.emergencyName||'—')+'</b>');
+        if(p.emergencyRelation) emergency.push('<span>關係：'+escapeHtml(p.emergencyRelation)+'</span>');
+        if(p.emergencyPhone) emergency.push('<span>'+escapeHtml(p.emergencyPhone)+'</span>');
+      } else if(p.emergency){
+        emergency.push('<span>'+escapeHtml(p.emergency)+'</span>'); // legacy combined field
+      }
+      var certCount = certCountForPerson(p);
+      var certLink = certCount > 0
+        ? '<button type="button" class="group-count" data-goto-certs="'+escapeHtml(p.name)+'">'+certCount+' 張證照</button>'
+        : '<span class="muted" style="font-size:14px;">尚無證照</span>';
+      var bloodTypeCell = p.bloodType ? escapeHtml(BLOOD_TYPE_LABEL[p.bloodType]||p.bloodType) : '<span class="muted">—</span>';
+      var genderCell = p.gender ? escapeHtml(GENDER_LABEL[p.gender]||p.gender) : '<span class="muted">—</span>';
+      var titleBadgeCls = p.title ? TITLE_BADGE_CLASS[p.title] : null;
+      var titleCell = !p.title ? '' :
+        (titleBadgeCls ? '<span class="title-badge '+titleBadgeCls+'">'+escapeHtml(p.title)+'</span>' : '<span>'+escapeHtml(p.title)+'</span>');
+      var externalBadge = p.isExternal ? '<span class="pill exempt" style="margin-left:6px;">外掛</span>' : '';
+      var rowCls = st==='inactive' ? ' class="row-inactive"' : (st==='leave' ? ' class="row-leave"' : '');
+      return '<tr data-id="'+escapeHtml(p.id)+'"'+rowCls+'>'+
+        '<td class="name-cell"><b>'+escapeHtml(p.name)+'</b>'+externalBadge+titleCell+certLink+'</td>'+
+        '<td class="num">'+genderCell+'</td>'+
+        '<td class="num">'+bloodTypeCell+'</td>'+
+        '<td class="contact-cell">'+deptCell+'</td>'+
+        '<td class="muted num">'+escapeHtml(fmtRocCompact(p.hireDate))+'</td>'+
+        '<td class="num">'+(fmtTenure(p) ? escapeHtml(fmtTenure(p)) : '<span class="muted">—</span>')+'</td>'+
+        '<td>'+statusCell+'</td>'+
+        '<td class="muted num">'+(st==='inactive' && p.departureDate ? escapeHtml(fmtRocCompact(p.departureDate)) : '<span class="muted">—</span>')+'</td>'+
+        '<td class="contact-cell">'+(contact.length ? contact.join('') : '<span class="muted">—</span>')+'</td>'+
+        '<td class="contact-cell">'+(emergency.length ? emergency.join('') : '<span class="muted">—</span>')+'</td>'+
+        '<td><div class="row-actions">'+
+          '<button class="btn small ghost" data-pact="edit" data-id="'+escapeHtml(p.id)+'">編輯</button>'+
+          '<button class="btn small ghost" data-pact="delete" data-id="'+escapeHtml(p.id)+'">刪除</button>'+
+        '</div></td>'+
+      '</tr>';
+    }).join('');
+  }
+
+  function updatePersonnelSortArrows(){
+    Array.prototype.forEach.call(document.querySelectorAll('th[data-psort]'), function(th){
+      var arrow = th.querySelector('.arrow');
+      if(th.getAttribute('data-psort') === state.personnelSortField){
+        arrow.textContent = state.personnelSortDir === 'asc' ? '▲' : '▼';
+      } else {
+        arrow.textContent = '';
+      }
+    });
+  }
+
+  function populateEmployeeSelect(){
+    var sel = document.getElementById('f_employeeId');
+    var current = sel.value;
+    var sorted = state.personnel.slice().sort(function(a,b){ return (a.name||'').localeCompare(b.name||'', 'zh-Hant'); });
+    sel.innerHTML = '<option value="">— 請選擇人員 —</option>' + sorted.map(function(p){
+      var label = p.name + (p.title ? '（'+p.title+'）' : '') + (p.status==='inactive' ? '（離職）' : (p.status==='leave' ? '（留職停薪）' : ''));
+      return '<option value="'+escapeHtml(p.id)+'">'+escapeHtml(label)+'</option>';
+    }).join('');
+    if(current && sorted.some(function(p){ return p.id === current; })) sel.value = current;
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('th[data-psort]'), function(th){
+    th.innerHTML = '<button type="button">' + th.innerHTML + '</button>';
+    th.querySelector('button').addEventListener('click', function(){
+      var f = th.getAttribute('data-psort');
+      if(state.personnelSortField === f){ state.personnelSortDir = state.personnelSortDir === 'asc' ? 'desc' : 'asc'; }
+      else { state.personnelSortField = f; state.personnelSortDir = 'asc'; }
+      state.personnelPage = 1;
+      renderPersonnel();
+    });
+  });
+
+  els.personnelTbody.addEventListener('click', function(e){
+    var certBtn = e.target.closest('button[data-goto-certs]');
+    if(certBtn){
+      var personName = certBtn.getAttribute('data-goto-certs');
+      state.search = personName;
+      state.filterStatus = 'all';
+      state.certsPage = 1;
+      els.search.value = personName;
+      switchPanel('certs');
+      render();
+      return;
+    }
+    var btn = e.target.closest('button[data-pact]');
+    if(!btn) return;
+    var id = btn.getAttribute('data-id');
+    var p = state.personnel.find(function(x){ return x.id === id; });
+    if(!p) return;
+    if(btn.getAttribute('data-pact') === 'edit'){
+      openPersonnelModal(p);
+    } else if(btn.getAttribute('data-pact') === 'delete'){
+      if(btn.dataset.armed === '1'){
+        removePersonnel(p);
+      } else {
+        btn.dataset.armed = '1';
+        btn.textContent = '確認刪除？';
+        btn.classList.add('danger-arm');
+        setTimeout(function(){
+          if(btn.isConnected){ btn.dataset.armed='0'; btn.textContent='刪除'; btn.classList.remove('danger-arm'); }
+        }, 3000);
+      }
+    }
+  });
+
+  els.personnelSearch.addEventListener('input', function(){ state.personnelSearch = els.personnelSearch.value; state.personnelPage = 1; renderPersonnel(); });
+  els.personnelStatusFilter.addEventListener('change', function(){ state.personnelStatusFilter = els.personnelStatusFilter.value; state.personnelPage = 1; renderPersonnel(); });
+  els.personnelClearBtn.addEventListener('click', function(){
+    state.personnelSearch=''; state.personnelStatusFilter='all';
+    state.personnelPage = 1;
+    els.personnelSearch.value=''; els.personnelStatusFilter.value='all';
+    renderPersonnel();
+  });
+
+  // ---------- personnel modal ----------
+
+  // 「各工地」為舊版部門選項（已於後續改版移除，改由獨立的「工地案場」欄位取代）；
+  // 凡遇到此舊值一律視為未設定部門，不再於下拉選單顯示「各工地（舊資料）」保留選項。
+  function normalizeDept(v){
+    return (v === '各工地') ? '' : (v || '');
+  }
+
+  // 重新以固定選項（管理部／工務部／採購部）填入部門選單；
+  // 若傳入 legacyValue 且不在固定清單中（例如舊資料的自訂部門），會額外附加一個保留選項，避免資料被覆蓋遺失。
+  function populateDepartmentSelect(legacyValue){
+    var sel = document.getElementById('p_departmentSelect');
+    sel.innerHTML = '<option value="">— 請選擇 —</option>' +
+      DEPARTMENT_PRESETS.map(function(t){ return '<option value="'+escapeHtml(t)+'">'+escapeHtml(t)+'</option>'; }).join('');
+    if(legacyValue && DEPARTMENT_PRESETS.indexOf(legacyValue) === -1){
+      var opt = document.createElement('option');
+      opt.value = legacyValue;
+      opt.textContent = legacyValue + '（舊資料）';
+      sel.appendChild(opt);
+    }
+  }
+  populateDepartmentSelect();
+
+  // 工地案場選單：固定案場清單＋「其他」可自行輸入尚未列入清單的新案名；未選填代表此人不指派工地。
+  function populateWorksiteSelect(){
+    var sel = document.getElementById('p_worksiteSelect');
+    sel.innerHTML = '<option value="">— 未指派工地 —</option>' +
+      WORKSITE_PRESETS.map(function(t){ return '<option value="'+escapeHtml(t)+'">'+escapeHtml(t)+'</option>'; }).join('') +
+      '<option value="__other__">其他（自行輸入）</option>';
+  }
+  populateWorksiteSelect();
+
+  function updateWorksiteOtherUI(){
+    var other = document.getElementById('p_worksiteSelect').value === '__other__';
+    document.getElementById('worksiteOtherRow').hidden = !other;
+  }
+  document.getElementById('p_worksiteSelect').addEventListener('change', updateWorksiteOtherUI);
+
+  // ---- 新增／編輯人員時，可順便在同一張表單新增該員的證照（存人員時一併寫入證照管理）----
+  // 欄位與填寫方式比照「證照管理」的新增證照表單：常用證照快速套用、發證日期、最近回訓日期、
+  // 回訓／效期週期（可一鍵算出到期日）、到期日＋免回訓、備註。
+  function addPersonnelCertRow(){
+    var wrap = document.createElement('div');
+    wrap.className = 'pcert-row';
+    wrap.innerHTML =
+      '<div class="pcert-row-head"><b>新增證照</b><button type="button" class="btn small ghost pcert-remove">移除</button></div>'+
+      '<div class="field"><label>常用證照快速套用（選填）</label><select class="pcert-preset"></select></div>'+
+      '<div class="field"><label>證照／資格名稱</label><input class="pcert-name" placeholder="例：職安卡" /></div>'+
+      '<div class="field"><label>目前證照用於工地案場（選填）</label><select class="pcert-usedworksite"></select>'+
+        '<div class="muted" style="font-size:14px;margin-top:4px;">此證照目前實際用於（如掛證、借調支援）的工地案場，與人員指派工地各自獨立、互不代表，請依實際情形個別填寫。</div>'+
+      '</div>'+
+      '<div class="field pcert-usedworksite-other-row" hidden>'+
+        '<label>請輸入工地案場名稱</label><input class="pcert-usedworksite-other" placeholder="例：OOOO新建工程" />'+
+      '</div>'+
+      '<div class="field"><label>發證日期</label>'+
+        '<div class="roc-date-row">'+
+          '<input class="pcert-issue-y" type="number" inputmode="numeric" placeholder="112" min="1" max="200" /><span>年</span>'+
+          '<input class="pcert-issue-m" type="number" inputmode="numeric" placeholder="07" min="1" max="12" /><span>月</span>'+
+          '<input class="pcert-issue-d" type="number" inputmode="numeric" placeholder="26" min="1" max="31" /><span>日</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="field"><label>最近一次回訓日期（選填）</label>'+
+        '<div class="roc-date-row">'+
+          '<input class="pcert-retrain-y" type="number" inputmode="numeric" placeholder="112" min="1" max="200" /><span>年</span>'+
+          '<input class="pcert-retrain-m" type="number" inputmode="numeric" placeholder="07" min="1" max="12" /><span>月</span>'+
+          '<input class="pcert-retrain-d" type="number" inputmode="numeric" placeholder="26" min="1" max="31" /><span>日</span>'+
+        '</div>'+
+        '<div class="muted" style="font-size:14px;margin-top:4px;">若已完成回訓，登打回訓證明日期後，到期日改從此日起算，而非原發證日。</div>'+
+      '</div>'+
+      '<div class="field"><label>回訓／效期週期（年，選填）</label>'+
+        '<div class="roc-date-row">'+
+          '<input class="pcert-cycle" type="number" inputmode="numeric" placeholder="例：4" min="1" max="20" />'+
+          '<button class="btn small ghost pcert-apply-cycle" type="button">算出到期日</button>'+
+        '</div>'+
+        '<div class="muted" style="font-size:14px;margin-top:4px;">依「最近回訓日」（若已填）或「發證日期」＋週期，自動算出到期日；此欄僅供換算，不會另外儲存。</div>'+
+        '<div class="pcert-msg" style="font-size:14px;margin-top:4px;"></div>'+
+      '</div>'+
+      '<div class="field"><label>到期日<span class="req pcert-expiry-req">*</span></label>'+
+        '<div class="roc-date-row">'+
+          '<input class="pcert-expiry-y" type="number" inputmode="numeric" placeholder="112" min="1" max="200" /><span>年</span>'+
+          '<input class="pcert-expiry-m" type="number" inputmode="numeric" placeholder="07" min="1" max="12" /><span>月</span>'+
+          '<input class="pcert-expiry-d" type="number" inputmode="numeric" placeholder="26" min="1" max="31" /><span>日</span>'+
+        '</div>'+
+        '<label style="display:flex;align-items:center;gap:7px;font-weight:500;font-size:15px;color:var(--ink-soft);margin-top:8px;cursor:pointer;">'+
+          '<input type="checkbox" class="pcert-exempt" style="width:18px;height:18px;" />'+
+          '免回訓（此證照無到期限制，不需定期回訓，不列入到期提醒）'+
+        '</label>'+
+      '</div>'+
+      '<div class="field"><label>備註</label>'+
+        '<textarea class="pcert-notes" placeholder="例：已報名10/15回訓場次、尚未報名、已完成回訓候補證書中"></textarea>'+
+      '</div>';
+    document.getElementById('personnelCertRows').appendChild(wrap);
+
+    var presetSel = wrap.querySelector('.pcert-preset');
+    presetSel.innerHTML = '<option value="">— 自行輸入證照名稱與週期 —</option>' + CERT_PRESETS.map(function(cp, i){
+      return '<option value="'+i+'">'+escapeHtml(cp.name)+'（每'+cp.cycle+'年回訓）</option>';
+    }).join('');
+    presetSel.addEventListener('change', function(){
+      if(presetSel.value === '') return;
+      var preset = CERT_PRESETS[Number(presetSel.value)];
+      wrap.querySelector('.pcert-name').value = preset.name;
+      wrap.querySelector('.pcert-cycle').value = preset.cycle;
+      presetSel.value = '';
+    });
+
+    // 「目前證照用於工地案場」：與人員的「指派工地案場」各自獨立，清單沿用同一份工地案場常用清單。
+    var usedWorksiteSel = wrap.querySelector('.pcert-usedworksite');
+    usedWorksiteSel.innerHTML = '<option value="">— 未指定 —</option>' +
+      WORKSITE_PRESETS.map(function(t){ return '<option value="'+escapeHtml(t)+'">'+escapeHtml(t)+'</option>'; }).join('') +
+      '<option value="__other__">其他（自行輸入）</option>';
+    usedWorksiteSel.addEventListener('change', function(){
+      wrap.querySelector('.pcert-usedworksite-other-row').hidden = usedWorksiteSel.value !== '__other__';
+    });
+
+    wrap.querySelector('.pcert-remove').addEventListener('click', function(){ wrap.remove(); });
+
+    function updateRowExemptUI(){
+      var exempt = wrap.querySelector('.pcert-exempt').checked;
+      ['pcert-expiry-y','pcert-expiry-m','pcert-expiry-d'].forEach(function(cls){
+        var el = wrap.querySelector('.'+cls);
+        el.disabled = exempt;
+        if(exempt) el.value = '';
+      });
+      ['pcert-retrain-y','pcert-retrain-m','pcert-retrain-d','pcert-cycle'].forEach(function(cls){
+        wrap.querySelector('.'+cls).disabled = exempt;
+      });
+      wrap.querySelector('.pcert-apply-cycle').disabled = exempt;
+      wrap.querySelector('.pcert-expiry-req').style.visibility = exempt ? 'hidden' : 'visible';
+    }
+    wrap.querySelector('.pcert-exempt').addEventListener('change', updateRowExemptUI);
+
+    wrap.querySelector('.pcert-apply-cycle').addEventListener('click', function(){
+      var msgEl = wrap.querySelector('.pcert-msg');
+      msgEl.textContent = '';
+      var ry = wrap.querySelector('.pcert-retrain-y').value.trim();
+      var rm = wrap.querySelector('.pcert-retrain-m').value.trim();
+      var rd = wrap.querySelector('.pcert-retrain-d').value.trim();
+      var usingRetrain = !!(ry && rm && rd);
+
+      var baseY, baseM, baseD, baseLabel;
+      if(usingRetrain){
+        baseY = ry; baseM = rm; baseD = rd; baseLabel = '最近回訓日';
+      } else {
+        baseY = wrap.querySelector('.pcert-issue-y').value.trim();
+        baseM = wrap.querySelector('.pcert-issue-m').value.trim();
+        baseD = wrap.querySelector('.pcert-issue-d').value.trim();
+        baseLabel = '發證日期';
+      }
+      var cy = wrap.querySelector('.pcert-cycle').value.trim();
+
+      if(!baseY || !baseM || !baseD){
+        msgEl.style.color = 'var(--red)';
+        msgEl.textContent = '請先完整輸入「最近回訓日期」或「發證日期」（年／月／日），才能換算到期日。';
+        return;
+      }
+      if(!cy || Number(cy) <= 0){
+        msgEl.style.color = 'var(--red)';
+        msgEl.textContent = '請輸入有效的週期年數（例：4）。';
+        return;
+      }
+
+      var ny = Number(baseY) + Number(cy);
+      wrap.querySelector('.pcert-expiry-y').value = ny;
+      wrap.querySelector('.pcert-expiry-m').value = pad(Number(baseM));
+      wrap.querySelector('.pcert-expiry-d').value = pad(Number(baseD));
+      msgEl.style.color = 'var(--accent-strong)';
+      msgEl.textContent = '已依「'+baseLabel+'」＋'+cy+'年，算出到期日。';
+    });
+  }
+  document.getElementById('addPersonnelCertRowBtn').addEventListener('click', function(){ addPersonnelCertRow(); });
+
+  // 讀取並驗證表單中目前列出的證照列；完全空白的列會被略過。
+  // 回傳 {rows:[{certType, issueDate, lastRetrainDate, expiryDate, exempt, notes, usedWorksite}]}
+  // 或 {error: '訊息'}（任一列有部分填寫但缺漏必要欄位時）。
+  function readPersonnelCertRows(){
+    var rowEls = Array.prototype.slice.call(document.querySelectorAll('#personnelCertRows .pcert-row'));
+    var rows = [];
+    for(var i=0;i<rowEls.length;i++){
+      var row = rowEls[i];
+      var name = row.querySelector('.pcert-name').value.trim();
+      var exempt = row.querySelector('.pcert-exempt').checked;
+      var notes = row.querySelector('.pcert-notes').value.trim();
+      var issueY = row.querySelector('.pcert-issue-y').value;
+      var issueM = row.querySelector('.pcert-issue-m').value;
+      var issueD = row.querySelector('.pcert-issue-d').value;
+      var retrainY = row.querySelector('.pcert-retrain-y').value;
+      var retrainM = row.querySelector('.pcert-retrain-m').value;
+      var retrainD = row.querySelector('.pcert-retrain-d').value;
+      var expiryY = row.querySelector('.pcert-expiry-y').value;
+      var expiryM = row.querySelector('.pcert-expiry-m').value;
+      var expiryD = row.querySelector('.pcert-expiry-d').value;
+      var usedWorksiteSelVal = row.querySelector('.pcert-usedworksite').value;
+      var usedWorksite = usedWorksiteSelVal === '__other__' ? row.querySelector('.pcert-usedworksite-other').value.trim() : usedWorksiteSelVal;
+
+      var isBlank = !name && !exempt && !notes && !usedWorksite &&
+        !issueY.trim() && !issueM.trim() && !issueD.trim() &&
+        !retrainY.trim() && !retrainM.trim() && !retrainD.trim() &&
+        !expiryY.trim() && !expiryM.trim() && !expiryD.trim();
+      if(isBlank) continue;
+
+      if(!name) return {error: '第'+(i+1)+'筆新增證照請輸入證照／資格名稱。'};
+
+      var issue = readRocDateParts(issueY, issueM, issueD, false, '「'+name+'」的發證日期');
+      if(issue.error) return {error: issue.error};
+
+      var expiry, retrain;
+      if(exempt){
+        expiry = {iso: ''};
+        retrain = {iso: ''};
+      } else {
+        expiry = readRocDateParts(expiryY, expiryM, expiryD, true, '「'+name+'」的到期日');
+        if(expiry.error) return {error: expiry.error};
+        retrain = readRocDateParts(retrainY, retrainM, retrainD, false, '「'+name+'」的最近回訓日期');
+        if(retrain.error) return {error: retrain.error};
+      }
+
+      rows.push({
+        certType: name,
+        issueDate: issue.iso,
+        lastRetrainDate: retrain.iso,
+        expiryDate: expiry.iso,
+        exempt: exempt,
+        notes: notes,
+        usedWorksite: usedWorksite
+      });
+    }
+    return { rows: rows };
+  }
+
+  (function populateTitleSelect(){
+    var sel = document.getElementById('p_titleSelect');
+    sel.innerHTML = '<option value="">— 請選擇 —</option>' +
+      TITLE_PRESETS.map(function(t){ return '<option value="'+escapeHtml(t)+'">'+escapeHtml(t)+'</option>'; }).join('') +
+      '<option value="__other__">其他（自行輸入）</option>';
+  })();
+
+  function updateTitleOtherUI(){
+    var other = document.getElementById('p_titleSelect').value === '__other__';
+    document.getElementById('titleOtherRow').hidden = !other;
+  }
+  document.getElementById('p_titleSelect').addEventListener('change', updateTitleOtherUI);
+
+  (function populateEmergencyRelationSelect(){
+    var sel = document.getElementById('p_emergencyRelationSelect');
+    sel.innerHTML = '<option value="">— 請選擇 —</option>' +
+      EMERGENCY_RELATION_PRESETS.map(function(t){ return '<option value="'+escapeHtml(t)+'">'+escapeHtml(t)+'</option>'; }).join('') +
+      '<option value="__other__">其他（自行輸入）</option>';
+  })();
+
+  function updateEmergencyRelationOtherUI(){
+    var other = document.getElementById('p_emergencyRelationSelect').value === '__other__';
+    document.getElementById('emergencyRelationOtherRow').hidden = !other;
+  }
+  document.getElementById('p_emergencyRelationSelect').addEventListener('change', updateEmergencyRelationOtherUI);
+
+  function updateDepartureUI(){
+    var statusVal = document.getElementById('p_status').value;
+    var inactive = statusVal === 'inactive';
+    var onLeave = statusVal === 'leave';
+    document.getElementById('departureDateRow').hidden = !inactive;
+    if(!inactive) setRocInputs('departureDate', '');
+    document.getElementById('leaveStartDateRow').hidden = !onLeave;
+    if(!onLeave) setRocInputs('leaveStartDate', '');
+    document.getElementById('leaveReasonRow').hidden = !onLeave;
+    if(!onLeave) document.getElementById('p_leaveReason').value = '';
+  }
+  document.getElementById('p_status').addEventListener('change', updateDepartureUI);
+
+  // 外掛人員：僅登打姓名、部門／工地案場（供「人力分配」模組歸類）與證照資料，隱藏基本資料
+  // （性別／身分證字號／血型／出生日期）、聯絡資訊、緊急聯絡人、公司職務／到職日期等欄位區塊，
+  // 儲存時這些欄位一律視為空白。
+  function updateExternalPersonUI(){
+    var external = document.getElementById('p_isExternal').checked;
+    document.getElementById('personnelFullInfoFields').hidden = external;
+  }
+  document.getElementById('p_isExternal').addEventListener('change', updateExternalPersonUI);
+
+  function updateHouseholdAddressUI(){
+    var same = document.getElementById('p_householdSame').checked;
+    var ta = document.getElementById('p_householdAddress');
+    ta.disabled = same;
+    if(same) ta.value = els.personnelForm.address.value;
+  }
+  document.getElementById('p_householdSame').addEventListener('change', updateHouseholdAddressUI);
+  document.getElementById('p_address').addEventListener('input', function(){
+    if(document.getElementById('p_householdSame').checked){
+      document.getElementById('p_householdAddress').value = this.value;
+    }
+  });
+
+  ['p_phone','p_emergencyPhone'].forEach(function(id){
+    document.getElementById(id).addEventListener('blur', function(){ this.value = formatTwPhone(this.value); });
+  });
+
+  function openPersonnelModal(p){
+    state.editingPersonnelId = p ? p.id : null;
+    els.personnelModalTitle.textContent = p ? '編輯人員' : '新增人員';
+    els.personnelFormError.innerHTML = '';
+    var f = els.personnelForm;
+    f.name.value = p ? p.name || '' : '';
+    document.getElementById('p_isExternal').checked = !!(p && p.isExternal);
+    updateExternalPersonUI();
+    f.idNumber.value = p ? p.idNumber || '' : '';
+    f.gender.value = p ? p.gender || '' : '';
+    f.bloodType.value = p ? p.bloodType || '' : '';
+    f.phone.value = p ? p.phone || '' : '';
+    f.email.value = p ? p.email || '' : '';
+    f.address.value = p ? p.address || '' : '';
+    f.householdAddress.value = p ? p.householdAddress || '' : '';
+    document.getElementById('p_householdSame').checked = !!(p && p.householdSameAsAddress);
+    updateHouseholdAddressUI();
+    f.emergencyName.value = p ? p.emergencyName || (p.emergency || '') : '';
+    f.emergencyPhone.value = p ? p.emergencyPhone || '' : '';
+    var emergencyRelationVal = p ? p.emergencyRelation || '' : '';
+    var emergencyRelationSel = document.getElementById('p_emergencyRelationSelect');
+    if(emergencyRelationVal && EMERGENCY_RELATION_PRESETS.indexOf(emergencyRelationVal) === -1){
+      emergencyRelationSel.value = '__other__';
+      document.getElementById('p_emergencyRelationOther').value = emergencyRelationVal;
+    } else {
+      emergencyRelationSel.value = emergencyRelationVal;
+      document.getElementById('p_emergencyRelationOther').value = '';
+    }
+    updateEmergencyRelationOtherUI();
+    var deptVal = p ? normalizeDept(p.department) : '';
+    populateDepartmentSelect(deptVal);
+    document.getElementById('p_departmentSelect').value = deptVal;
+    var worksiteVal = p ? p.worksite || '' : '';
+    var worksiteSel = document.getElementById('p_worksiteSelect');
+    if(worksiteVal && WORKSITE_PRESETS.indexOf(worksiteVal) === -1){
+      worksiteSel.value = '__other__';
+      document.getElementById('p_worksiteOther').value = worksiteVal;
+    } else {
+      worksiteSel.value = worksiteVal;
+      document.getElementById('p_worksiteOther').value = '';
+    }
+    updateWorksiteOtherUI();
+    var titleVal = p ? p.title || '' : '';
+    var titleSel = document.getElementById('p_titleSelect');
+    if(titleVal && TITLE_PRESETS.indexOf(titleVal) === -1){
+      titleSel.value = '__other__';
+      document.getElementById('p_titleOther').value = titleVal;
+    } else {
+      titleSel.value = titleVal;
+      document.getElementById('p_titleOther').value = '';
+    }
+    updateTitleOtherUI();
+    f.status.value = p && (p.status === 'inactive' || p.status === 'leave') ? p.status : 'active';
+    setRocInputs('hireDate', p ? p.hireDate : '');
+    setRocInputs('birthDate', p ? p.birthDate : '');
+    setRocInputs('departureDate', p ? p.departureDate : '');
+    setRocInputs('leaveStartDate', p ? p.leaveStartDate : '');
+    document.getElementById('p_leaveReason').value = p ? p.leaveReason || '' : '';
+    updateDepartureUI();
+    document.getElementById('personnelCertRows').innerHTML = '';
+    if(!p) addPersonnelCertRow(); // 新增人員時預先顯示一筆空白證照列，方便順便登打
+    els.personnelOverlay.hidden = false;
+    setTimeout(function(){ f.name.focus(); }, 0);
+  }
+  function closePersonnelModalFn(){ els.personnelOverlay.hidden = true; state.editingPersonnelId = null; }
+
+  els.personnelAddBtn.addEventListener('click', function(){ openPersonnelModal(null); });
+  els.closePersonnelModal.addEventListener('click', closePersonnelModalFn);
+  els.personnelCancelBtn.addEventListener('click', closePersonnelModalFn);
+  els.personnelOverlay.addEventListener('click', function(e){ if(e.target === els.personnelOverlay) closePersonnelModalFn(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !els.personnelOverlay.hidden) closePersonnelModalFn(); });
+
+  els.personnelSaveBtn.addEventListener('click', function(){
+    var f = els.personnelForm;
+    els.personnelFormError.innerHTML = '';
+    if(!f.reportValidity()) return;
+
+    var isExternal = document.getElementById('p_isExternal').checked;
+
+    var deptVal = document.getElementById('p_departmentSelect').value;
+
+    var titleSel = document.getElementById('p_titleSelect');
+    var titleVal = titleSel.value === '__other__' ? document.getElementById('p_titleOther').value.trim() : titleSel.value;
+
+    var worksiteSelVal = document.getElementById('p_worksiteSelect').value;
+    var worksiteVal = worksiteSelVal === '__other__' ? document.getElementById('p_worksiteOther').value.trim() : worksiteSelVal;
+
+    var emergencyRelationSelVal = document.getElementById('p_emergencyRelationSelect').value;
+    var emergencyRelationValOut = emergencyRelationSelVal === '__other__' ? document.getElementById('p_emergencyRelationOther').value.trim() : emergencyRelationSelVal;
+
+    var hire = { iso: '' }, birth = { iso: '' }, departure = { iso: '' }, leaveStart = { iso: '' };
+    var isInactive = false, isOnLeave = false;
+    if(!isExternal){
+      hire = readRocDate('hireDate', false, '到職日期');
+      if(hire.error){ showPersonnelFormError({message: hire.error}); return; }
+      birth = readRocDate('birthDate', false, '出生日期');
+      if(birth.error){ showPersonnelFormError({message: birth.error}); return; }
+      isInactive = f.status.value === 'inactive';
+      isOnLeave = f.status.value === 'leave';
+      departure = readRocDate('departureDate', false, '離職日期');
+      if(departure.error){ showPersonnelFormError({message: departure.error}); return; }
+      leaveStart = readRocDate('leaveStartDate', false, '留職停薪起始日');
+      if(leaveStart.error){ showPersonnelFormError({message: leaveStart.error}); return; }
+    }
+
+    var certRowsResult = readPersonnelCertRows();
+    if(certRowsResult.error){ showPersonnelFormError({message: certRowsResult.error}); return; }
+
+    var householdSame = document.getElementById('p_householdSame').checked;
+    var addressVal = f.address.value.trim();
+    // 外掛人員：不儲存基本資料／聯絡資訊／公司職務等資料，僅保留姓名、外掛人員標記、部門／
+    // 工地案場（供「人力分配」模組歸類）與證照資料。
+    var data = {
+      name: f.name.value.trim(),
+      isExternal: isExternal,
+      idNumber: isExternal ? '' : f.idNumber.value.trim(),
+      gender: isExternal ? '' : f.gender.value,
+      bloodType: isExternal ? '' : f.bloodType.value,
+      title: isExternal ? '' : titleVal,
+      department: deptVal,
+      worksite: worksiteVal,
+      status: isExternal ? 'active' : f.status.value,
+      phone: isExternal ? '' : formatTwPhone(f.phone.value),
+      email: isExternal ? '' : f.email.value.trim(),
+      emergencyName: isExternal ? '' : f.emergencyName.value.trim(),
+      emergencyRelation: isExternal ? '' : emergencyRelationValOut,
+      emergencyPhone: isExternal ? '' : formatTwPhone(f.emergencyPhone.value),
+      address: isExternal ? '' : addressVal,
+      householdAddress: isExternal ? '' : (householdSame ? addressVal : f.householdAddress.value.trim()),
+      householdSameAsAddress: isExternal ? false : householdSame,
+      hireDate: hire.iso,
+      birthDate: birth.iso,
+      departureDate: isInactive ? departure.iso : '',
+      leaveStartDate: isOnLeave ? leaveStart.iso : '',
+      leaveReason: isOnLeave ? document.getElementById('p_leaveReason').value.trim() : '',
+      updatedAt: new Date().toISOString()
+    };
+    els.personnelSaveBtn.disabled = true;
+    var task = state.editingPersonnelId ? savePersonnel(state.editingPersonnelId, data, false) : savePersonnel(null, data, true);
+    task.then(function(personId){
+      // 員工基本資料（例如姓名、職稱）修正時，證照管理中已連結此人的證照紀錄同步更新，避免顯示舊資料。
+      return syncPersonCertsCachedInfo({ id: personId, name: data.name, title: data.title }).then(function(){
+        // 員工離職：證照管理中屬於此人的證照紀錄一併清除，僅保留員工管理的人事紀錄；
+        // 離職狀態下也不新增／保留任何新登打的證照列。
+        if(isInactive){
+          return deleteCertsForPerson({ id: personId, name: data.name });
+        }
+        if(certRowsResult.rows.length === 0) return;
+        return Promise.all(certRowsResult.rows.map(function(r){
+          return saveCert(null, {
+            name: data.name,
+            title: data.title,
+            personnelId: personId,
+            certType: r.certType,
+            issueDate: r.issueDate,
+            lastRetrainDate: r.lastRetrainDate,
+            expiryDate: r.expiryDate,
+            exempt: r.exempt,
+            notes: r.notes,
+            usedWorksite: r.usedWorksite,
+            updatedAt: new Date().toISOString()
+          }, true);
+        }));
+      });
+    }).then(function(){
+      els.personnelSaveBtn.disabled = false;
+      closePersonnelModalFn();
+      renderPersonnel(); // 立即更新證照張數計數（線上模式仍會再由 onSnapshot 同步一次）
+    }).catch(function(err){
+      els.personnelSaveBtn.disabled = false;
+      showPersonnelFormError(err);
+    });
+  });
+
+  function showPersonnelFormError(err){
+    var msg = '儲存失敗，請稍後再試。';
+    if(err && err.code === 'quota_exceeded') msg = '資料庫已達筆數上限，請先刪除部分舊資料再新增。';
+    else if(err && err.code === 'invalid_argument') msg = '儲存失敗：可能是日期格式有誤，或您目前沒有這個工具的編輯權限（請確認已由分享連結取得存取權，且與建立者屬於同一個組織帳號）。';
+    else if(err && err.message) msg = err.message;
+    els.personnelFormError.innerHTML = '<div class="form-error">'+escapeHtml(msg)+'</div>';
+  }
+
+  // 儲存人員資料；無論線上／離線模式，皆會 resolve 該筆人員的 id，
+  // 供呼叫端接著以 personnelId 建立連結的證照紀錄。
+  function savePersonnel(id, data, isNew){
+    if(state.dbMode === 'live' && personnelCol){
+      if(isNew){
+        return personnelCol.add(Object.assign({createdAt: new Date().toISOString()}, data)).then(function(ref){ return ref.id; });
+      }
+      return personnelCol.doc(id).update(data).then(function(){ return id; });
+    }
+    return new Promise(function(resolve){
+      var savedId;
+      if(isNew){
+        savedId = 'local-p-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
+        state.personnel.push(Object.assign({id:savedId, createdAt:new Date().toISOString()}, data));
+      } else {
+        savedId = id;
+        var idx = state.personnel.findIndex(function(p){ return p.id === id; });
+        if(idx >= 0) state.personnel[idx] = Object.assign({}, state.personnel[idx], data);
+      }
+      renderPersonnel();
+      resolve(savedId);
+    });
+  }
+
+  // 刪除員工：連同證照管理中屬於此人的所有證照紀錄一併刪除（比照離職時的清除邏輯），
+  // 避免員工管理已無此人，證照管理卻殘留無主的證照紀錄。
+  function removePersonnel(p){
+    var id = p.id;
+    deleteCertsForPerson(p);
+    if(state.dbMode === 'live' && personnelCol){
+      personnelCol.doc(id).delete().catch(function(){ /* ignore */ });
+      return;
+    }
+    state.personnel = state.personnel.filter(function(x){ return x.id !== id; });
+    renderPersonnel();
+  }
+
+  // ---- 公司公告：新增／編輯／刪除，寫入模式比照員工管理（連線時寫入雲端資料庫，離線時僅存於本次瀏覽） ----
+  function openAnnounceModal(a){
+    state.editingAnnouncementId = a ? a.id : null;
+    els.announceModalTitle.textContent = a ? '編輯公告' : '新增公告';
+    els.announceFormError.innerHTML = '';
+    document.getElementById('f_announceTitle').value = a ? (a.title||'') : '';
+    document.getElementById('f_announceBody').value = a ? (a.body||'') : '';
+    document.getElementById('f_announceType').value = a ? (a.type||'normal') : 'normal';
+    els.announceOverlay.hidden = false;
+    document.getElementById('f_announceTitle').focus();
+  }
+  function closeAnnounceModalFn(){ els.announceOverlay.hidden = true; state.editingAnnouncementId = null; }
+  els.announceAddBtn.addEventListener('click', function(){ openAnnounceModal(null); });
+  els.closeAnnounceModal.addEventListener('click', closeAnnounceModalFn);
+  els.announceCancelBtn.addEventListener('click', closeAnnounceModalFn);
+  els.announceOverlay.addEventListener('click', function(e){ if(e.target === els.announceOverlay) closeAnnounceModalFn(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !els.announceOverlay.hidden) closeAnnounceModalFn(); });
+
+  function showAnnounceFormError(err){
+    var msg = '儲存失敗，請稍後再試。';
+    if(err && err.code === 'quota_exceeded') msg = '資料庫已達筆數上限，請先刪除部分舊公告再新增。';
+    else if(err && err.message) msg = err.message;
+    els.announceFormError.innerHTML = '<div class="form-error">'+escapeHtml(msg)+'</div>';
+  }
+
+  els.announceSaveBtn.addEventListener('click', function(){
+    var title = document.getElementById('f_announceTitle').value.trim();
+    if(!title){
+      els.announceFormError.innerHTML = '<div class="form-error">請輸入公告標題。</div>';
+      return;
+    }
+    var isNew = !state.editingAnnouncementId;
+    var data = {
+      title: title,
+      body: document.getElementById('f_announceBody').value.trim(),
+      type: document.getElementById('f_announceType').value,
+      postedAt: isNew ? fmtDate(today) : undefined
+    };
+    if(!isNew) delete data.postedAt; // 編輯既有公告時，不覆蓋原本的發布日期
+    els.announceSaveBtn.disabled = true;
+    saveAnnouncement(state.editingAnnouncementId, data, isNew).then(function(){
+      els.announceSaveBtn.disabled = false;
+      closeAnnounceModalFn();
+      renderAnnouncements();
+    }).catch(function(err){
+      els.announceSaveBtn.disabled = false;
+      showAnnounceFormError(err);
+    });
+  });
+
+  function saveAnnouncement(id, data, isNew){
+    if(state.dbMode === 'live' && announcementsCol){
+      if(isNew){
+        return announcementsCol.add(Object.assign({postedAt: fmtDate(today), createdAt: new Date().toISOString()}, data)).then(function(){});
+      }
+      return announcementsCol.doc(id).update(data).then(function(){});
+    }
+    return new Promise(function(resolve){
+      if(isNew){
+        var newId = 'local-a-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
+        state.announcements.push(Object.assign({id:newId, postedAt: fmtDate(today)}, data));
+      } else {
+        var idx = state.announcements.findIndex(function(x){ return x.id === id; });
+        if(idx >= 0) state.announcements[idx] = Object.assign({}, state.announcements[idx], data);
+      }
+      resolve();
+    });
+  }
+
+  function removeAnnouncement(id){
+    if(state.dbMode === 'live' && announcementsCol){
+      announcementsCol.doc(id).delete().catch(function(){ /* ignore */ });
+      return;
+    }
+    state.announcements = state.announcements.filter(function(x){ return x.id !== id; });
+    renderAnnouncements();
+  }
+
+  // 離線快取：每次成功從雲端資料庫同步時，把當下的公司真實資料留存一份在本機瀏覽器
+  // （僅此瀏覽器、此裝置，不會上傳也不會給其他人看到）。之後若又連不上雲端資料庫，
+  // 離線預覽會優先顯示這份「上次連線時的公司資料」，而不是通用示範資料。
+  var CACHE_KEY_CERTS = 'srCertDashboard_certsCache_v1';
+  var CACHE_KEY_PERSONNEL = 'srCertDashboard_personnelCache_v1';
+  var CACHE_KEY_ANNOUNCEMENTS = 'srCertDashboard_announcementsCache_v1';
+  function safeCacheSet(key, value){
+    try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){ /* 瀏覽器封鎖或無痕模式，略過快取 */ }
+  }
+  function safeCacheGet(key){
+    try{
+      var raw = localStorage.getItem(key);
+      if(!raw) return null;
+      var parsed = JSON.parse(raw);
+      return (Array.isArray(parsed) && parsed.length > 0) ? parsed : null;
+    }catch(e){ return null; }
+  }
+
+  var SEED_PERSONNEL = [
+    {name:'王志成', title:'工地主任', department:'工務部', status:'active', hireDate:'2018-05-01', phone:'0912-345-678', emergencyName:'王太太', emergencyPhone:'0987-000-111'},
+    {name:'陳建宏', title:'職安人員', department:'工安部', status:'active', hireDate:'2020-03-16'},
+    {name:'李美玲', title:'行政人員', department:'採購部', status:'active', hireDate:'2019-07-01'},
+    {name:'張文彬', title:'工程師', department:'機電部', status:'active', hireDate:'2017-11-20'},
+    {name:'林俊傑', title:'工地主任', department:'工務部', status:'active', hireDate:'2021-02-08'},
+    {name:'黃淑芬', title:'品管人員', department:'品管部', status:'active', hireDate:'2021-09-13'}
+  ];
+
+  function usePersonnelSeedFallback(){
+    var cached = safeCacheGet(CACHE_KEY_PERSONNEL);
+    if(cached){
+      state.personnel = cached;
+      state.usingCachedPersonnel = true;
+    } else {
+      state.personnel = SEED_PERSONNEL.map(function(p, i){ return Object.assign({id:'seed-p-'+i}, p); });
+      state.usingCachedPersonnel = false;
+    }
+    state.personnelLoading = false;
+    renderPersonnel();
+  }
+
+  var SEED_ANNOUNCEMENTS = [
+    {title:'新進人員報到流程更新', body:'即日起新進人員報到，請先至人事管理系統完成基本資料建檔，再辦理識別證與工地安全講習。', type:'normal'},
+    {title:'秋季職安衛教育訓練開跑', body:'各工地主管與職安人員請留意證照到期日，提前安排回訓場次，避免證照到期出現空窗期。', type:'important'}
+  ];
+
+  function useAnnouncementsSeedFallback(){
+    var cached = safeCacheGet(CACHE_KEY_ANNOUNCEMENTS);
+    if(cached){
+      state.announcements = cached;
+      state.usingCachedAnnouncements = true;
+    } else {
+      state.announcements = SEED_ANNOUNCEMENTS.map(function(a, i){
+        return Object.assign({id:'seed-a-'+i, postedAt: fmtDate(today)}, a);
+      });
+      state.usingCachedAnnouncements = false;
+    }
+    state.announcementsLoading = false;
+    renderAnnouncements();
+  }
+
+  var GENDER_LABEL = {male:'男', female:'女', other:'不提供'};
+  var BLOOD_TYPE_LABEL = {A:'A', B:'B', AB:'AB', O:'O', unknown:'不確定'};
+
+  function exportPersonnelCsv(){
+    var rows = window._exportPersonnelRows || [];
+    var header = ['姓名','人員類型','身分證字號','性別','血型','出生日期','部門','工地案場','公司職務','到職日期','年資','在職狀態','離職日期','留職停薪起始日','留職停薪原因',
+      '聯絡電話','Email','通訊地址','戶籍地址','緊急聯絡人姓名','緊急聯絡人關係','緊急聯絡人電話'];
+    var lines = [header.join(',')];
+    rows.forEach(function(p){
+      var st = p.status === 'inactive' ? 'inactive' : (p.status === 'leave' ? 'leave' : 'active');
+      var emgName = p.emergencyName || (p.emergency ? p.emergency : '');
+      var deptOut = normalizeDept(p.department);
+      var line = [p.name, p.isExternal ? '外掛人員' : '正式員工', p.idNumber||'', GENDER_LABEL[p.gender]||'', BLOOD_TYPE_LABEL[p.bloodType]||'', fmtRocCompact(p.birthDate),
+          deptOut, p.worksite||'', p.title||'', fmtRocCompact(p.hireDate), fmtTenure(p), STATUS_LABEL[st], st==='inactive' ? fmtRocCompact(p.departureDate) : '',
+          st==='leave' ? fmtRocCompact(p.leaveStartDate) : '', st==='leave' ? (p.leaveReason||'') : '',
+          p.phone||'', p.email||'', p.address||'', p.householdAddress||'', emgName, p.emergencyRelation||'', p.emergencyPhone||'']
+        .map(function(v){ v = String(v==null?'':v); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; })
+        .join(',');
+      lines.push(line);
+    });
+    var csv = '﻿' + lines.join('\r\n');
+    if(!downloadsApi){ return; }
+    downloadsApi.save({ filename: '人員基本資料_' + fmtDate(today) + '.csv', data: csv }).catch(function(){ /* declined or unavailable */ });
+  }
+  els.personnelExportBtn.addEventListener('click', exportPersonnelCsv);
+
+  // ---------- table interactions ----------
+
+  Array.prototype.forEach.call(document.querySelectorAll('th[data-sort]'), function(th){
+    th.innerHTML = '<button type="button">' + th.innerHTML + '</button>';
+    th.querySelector('button').addEventListener('click', function(){
+      var f = th.getAttribute('data-sort');
+      if(state.sortField === f){ state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc'; }
+      else { state.sortField = f; state.sortDir = 'asc'; }
+      state.certsPage = 1;
+      render();
+    });
+  });
+
+  els.tbody.addEventListener('click', function(e){
+    var certTypeBtn = e.target.closest('button[data-filter-certtype]');
+    if(certTypeBtn){
+      if(state.sortField === 'certType'){ state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc'; }
+      else { state.sortField = 'certType'; state.sortDir = 'asc'; }
+      state.certsPage = 1;
+      render();
+      return;
+    }
+    var statusBtn = e.target.closest('button[data-filter-status]');
+    if(statusBtn){
+      var statusVal = statusBtn.getAttribute('data-filter-status');
+      state.filterStatus = (state.filterStatus === statusVal) ? 'all' : statusVal;
+      state.certsPage = 1;
+      render();
+      return;
+    }
+    var btn = e.target.closest('button[data-act]');
+    if(!btn) return;
+    var id = btn.getAttribute('data-id');
+    var cert = state.certs.find(function(c){ return c.id === id; });
+    if(!cert) return;
+    if(btn.getAttribute('data-act') === 'edit'){
+      openModal(cert);
+    } else if(btn.getAttribute('data-act') === 'delete'){
+      if(btn.dataset.armed === '1'){
+        removeCert(id);
+      } else {
+        btn.dataset.armed = '1';
+        btn.textContent = '確認刪除？';
+        btn.classList.add('danger-arm');
+        setTimeout(function(){
+          if(btn.isConnected){ btn.dataset.armed='0'; btn.textContent='刪除'; btn.classList.remove('danger-arm'); }
+        }, 3000);
+      }
+    }
+  });
+
+  els.search.addEventListener('input', function(){ state.search = els.search.value; state.certsPage = 1; render(); });
+  els.clearBtn.addEventListener('click', function(){
+    state.search=''; state.filterStatus='all';
+    state.certsPage = 1;
+    els.search.value='';
+    render();
+  });
+
+  // ---------- modal ----------
+
+  function openModal(cert){
+    state.editingId = cert ? cert.id : null;
+    els.modalTitle.textContent = cert ? '編輯證照' : '新增證照';
+    els.formError.innerHTML = '';
+    var f = els.form;
+    populateEmployeeSelect();
+    var linkedPerson = cert && cert.personnelId ? state.personnel.find(function(p){ return p.id === cert.personnelId; }) : null;
+    var manual = !!cert && !linkedPerson; // legacy record (no link), or link target no longer exists
+    document.getElementById('f_manualPerson').checked = manual || (!cert && state.personnel.length === 0);
+    document.getElementById('f_employeeId').value = linkedPerson ? linkedPerson.id : '';
+    updateManualPersonUI();
+    var usedWorksiteVal = cert ? (cert.usedWorksite || '') : '';
+    var usedSel = document.getElementById('f_usedWorksite');
+    if(usedWorksiteVal && WORKSITE_PRESETS.indexOf(usedWorksiteVal) === -1){
+      usedSel.value = '__other__';
+      document.getElementById('f_usedWorksiteOther').value = usedWorksiteVal;
+    } else {
+      usedSel.value = usedWorksiteVal;
+      document.getElementById('f_usedWorksiteOther').value = '';
+    }
+    updateUsedWorksiteOtherUI();
+    f.name.value = cert ? cert.name || '' : '';
+    f.title.value = cert ? cert.title || '' : '';
+    f.certType.value = cert ? cert.certType || '' : '';
+    setRocInputs('issueDate', cert ? cert.issueDate : '');
+    setRocInputs('lastRetrain', cert ? cert.lastRetrainDate : '');
+    setRocInputs('expiryDate', cert ? cert.expiryDate : '');
+    document.getElementById('f_cycleYears').value = '';
+    document.getElementById('f_presetSelect').value = '';
+    document.getElementById('f_exempt').checked = !!(cert && cert.exempt);
+    updateExemptUI();
+    f.notes.value = cert ? cert.notes || '' : '';
+    els.overlay.hidden = false;
+    setTimeout(function(){ document.getElementById('f_employeeId').focus(); }, 0);
+  }
+  function closeModalFn(){ els.overlay.hidden = true; state.editingId = null; }
+
+  function updateExemptUI(){
+    var exempt = document.getElementById('f_exempt').checked;
+    ['f_expiryDate_y','f_expiryDate_m','f_expiryDate_d'].forEach(function(id){
+      var el = document.getElementById(id);
+      el.required = !exempt;
+      el.disabled = exempt;
+      if(exempt) el.value = '';
+    });
+    ['f_lastRetrain_y','f_lastRetrain_m','f_lastRetrain_d','f_cycleYears'].forEach(function(id){
+      document.getElementById(id).disabled = exempt;
+    });
+    document.getElementById('applyCycleBtn').disabled = exempt;
+    document.getElementById('expiryReqMark').style.visibility = exempt ? 'hidden' : 'visible';
+  }
+  document.getElementById('f_exempt').addEventListener('change', updateExemptUI);
+
+  function updateManualPersonUI(){
+    var manual = document.getElementById('f_manualPerson').checked;
+    document.getElementById('manualPersonRow').hidden = !manual;
+    document.getElementById('f_employeeId').disabled = manual;
+    document.getElementById('f_name').required = manual;
+    document.getElementById('employeeReqMark').style.visibility = manual ? 'hidden' : 'visible';
+  }
+  document.getElementById('f_manualPerson').addEventListener('change', updateManualPersonUI);
+
+  // 「目前證照用於工地案場」：與人員的「指派工地案場」是兩筆各自獨立的資訊（派駐某工地不代表證照
+  // 就用於該工地），須個別填寫；清單沿用同一份工地案場常用清單。
+  function populateUsedWorksiteSelect(){
+    var sel = document.getElementById('f_usedWorksite');
+    sel.innerHTML = '<option value="">— 未指定 —</option>' +
+      WORKSITE_PRESETS.map(function(t){ return '<option value="'+escapeHtml(t)+'">'+escapeHtml(t)+'</option>'; }).join('') +
+      '<option value="__other__">其他（自行輸入）</option>';
+  }
+  populateUsedWorksiteSelect();
+
+  function updateUsedWorksiteOtherUI(){
+    var other = document.getElementById('f_usedWorksite').value === '__other__';
+    document.getElementById('usedWorksiteOtherRow').hidden = !other;
+  }
+  document.getElementById('f_usedWorksite').addEventListener('change', updateUsedWorksiteOtherUI);
+
+  (function populatePresetSelect(){
+    var sel = document.getElementById('f_presetSelect');
+    sel.innerHTML = '<option value="">— 自行輸入證照名稱與週期 —</option>' + CERT_PRESETS.map(function(p, i){
+      return '<option value="'+i+'">'+escapeHtml(p.name)+'（每'+p.cycle+'年回訓）</option>';
+    }).join('');
+  })();
+
+  document.getElementById('f_presetSelect').addEventListener('change', function(){
+    var sel = this;
+    if(sel.value === '') return;
+    var preset = CERT_PRESETS[Number(sel.value)];
+    els.form.certType.value = preset.name;
+    document.getElementById('f_cycleYears').value = preset.cycle;
+    if(preset.note){
+      els.formError.innerHTML = '<div class="form-error" style="background:var(--accent-soft);color:var(--accent-strong);border-color:var(--line);">'+escapeHtml(preset.note)+'</div>';
+    }
+    sel.value = '';
+  });
+
+  document.getElementById('applyCycleBtn').addEventListener('click', function(){
+    els.formError.innerHTML = '';
+    var ry = document.getElementById('f_lastRetrain_y').value.trim();
+    var rm = document.getElementById('f_lastRetrain_m').value.trim();
+    var rd = document.getElementById('f_lastRetrain_d').value.trim();
+    var usingRetrain = !!(ry && rm && rd);
+
+    var baseY, baseM, baseD, baseLabel;
+    if(usingRetrain){
+      baseY = ry; baseM = rm; baseD = rd; baseLabel = '最近回訓日';
+    } else {
+      baseY = document.getElementById('f_issueDate_y').value.trim();
+      baseM = document.getElementById('f_issueDate_m').value.trim();
+      baseD = document.getElementById('f_issueDate_d').value.trim();
+      baseLabel = '發證日期';
+    }
+    var cy = document.getElementById('f_cycleYears').value.trim();
+
+    if(!baseY || !baseM || !baseD){
+      showFormError({message:'請先完整輸入「最近回訓日期」或「發證日期」（年／月／日），才能換算到期日。'});
+      return;
+    }
+    if(!cy || Number(cy) <= 0){ showFormError({message:'請輸入有效的週期年數（例：4）。'}); return; }
+
+    var ny = Number(baseY) + Number(cy);
+    document.getElementById('f_expiryDate_y').value = ny;
+    document.getElementById('f_expiryDate_m').value = pad(Number(baseM));
+    document.getElementById('f_expiryDate_d').value = pad(Number(baseD));
+    els.formError.innerHTML = '<div class="form-error" style="background:var(--accent-soft);color:var(--accent-strong);border-color:var(--line);">已依「'+baseLabel+'」＋'+cy+'年，算出到期日。</div>';
+  });
+
+  els.addBtn.addEventListener('click', function(){ openModal(null); });
+  els.closeModal.addEventListener('click', closeModalFn);
+  els.cancelBtn.addEventListener('click', closeModalFn);
+  els.overlay.addEventListener('click', function(e){ if(e.target === els.overlay) closeModalFn(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !els.overlay.hidden) closeModalFn(); });
+
+  els.saveBtn.addEventListener('click', function(){
+    var f = els.form;
+    els.formError.innerHTML = '';
+    if(!f.reportValidity()) return;
+
+    var manual = document.getElementById('f_manualPerson').checked;
+    var personnelId = '', personName = '', personTitle = '';
+    if(manual){
+      personName = f.name.value.trim();
+      personTitle = f.title.value.trim();
+      if(!personName){ showFormError({message:'請輸入姓名。'}); return; }
+    } else {
+      var selId = document.getElementById('f_employeeId').value;
+      if(!selId){ showFormError({message:'請選擇人員，或勾選「人員資料庫查無此人」改為手動輸入姓名。'}); return; }
+      var person = state.personnel.find(function(p){ return p.id === selId; });
+      if(!person){ showFormError({message:'找不到所選人員資料，請重新選擇。'}); return; }
+      personnelId = person.id;
+      personName = person.name;
+      personTitle = person.title || '';
+    }
+
+    var isExempt = document.getElementById('f_exempt').checked;
+    var issue = readRocDate('issueDate', false, '發證日期');
+    if(issue.error){ showFormError({message: issue.error}); return; }
+
+    var expiry, retrain;
+    if(isExempt){
+      expiry = {iso: ''};
+      retrain = {iso: ''};
+    } else {
+      expiry = readRocDate('expiryDate', true, '到期日');
+      if(expiry.error){ showFormError({message: expiry.error}); return; }
+      retrain = readRocDate('lastRetrain', false, '最近回訓日期');
+      if(retrain.error){ showFormError({message: retrain.error}); return; }
+    }
+
+    var usedWorksiteSelVal = document.getElementById('f_usedWorksite').value;
+    var usedWorksiteVal = usedWorksiteSelVal === '__other__' ? document.getElementById('f_usedWorksiteOther').value.trim() : usedWorksiteSelVal;
+
+    var data = {
+      name: personName,
+      title: personTitle,
+      personnelId: personnelId,
+      certType: f.certType.value.trim(),
+      usedWorksite: usedWorksiteVal,
+      issueDate: issue.iso,
+      lastRetrainDate: retrain.iso,
+      expiryDate: expiry.iso,
+      exempt: isExempt,
+      notes: f.notes.value.trim(),
+      updatedAt: new Date().toISOString()
+    };
+    els.saveBtn.disabled = true;
+    var task = state.editingId ? saveCert(state.editingId, data, false) : saveCert(null, data, true);
+    task.then(function(){
+      els.saveBtn.disabled = false;
+      closeModalFn();
+    }).catch(function(err){
+      els.saveBtn.disabled = false;
+      showFormError(err);
+    });
+  });
+
+  function showFormError(err){
+    var msg = '儲存失敗，請稍後再試。';
+    if(err && err.code === 'quota_exceeded') msg = '資料庫已達筆數上限，請先刪除部分舊資料再新增。';
+    else if(err && err.code === 'invalid_argument') msg = '儲存失敗：可能是日期格式有誤，或您目前沒有這個工具的編輯權限（請確認已由分享連結取得存取權，且與建立者屬於同一個組織帳號）。';
+    else if(err && err.message) msg = err.message;
+    els.formError.innerHTML = '<div class="form-error">'+escapeHtml(msg)+'</div>';
+  }
+
+  // ---------- data layer ----------
+
+  function saveCert(id, data, isNew){
+    if(state.dbMode === 'live' && col){
+      if(isNew){
+        return col.add(Object.assign({createdAt: new Date().toISOString()}, data));
+      }
+      return col.doc(id).update(data);
+    }
+    // offline fallback: in-memory only
+    return new Promise(function(resolve){
+      if(isNew){
+        var newId = 'local-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
+        state.certs.push(Object.assign({id:newId, createdAt:new Date().toISOString()}, data));
+      } else {
+        var idx = state.certs.findIndex(function(c){ return c.id === id; });
+        if(idx >= 0) state.certs[idx] = Object.assign({}, state.certs[idx], data);
+      }
+      render();
+      renderPersonnel(); // 更新員工管理裡的證照張數計數
+      resolve();
+    });
+  }
+
+  function removeCert(id){
+    if(state.dbMode === 'live' && col){
+      col.doc(id).delete().catch(function(){ /* ignore */ });
+      return;
+    }
+    state.certs = state.certs.filter(function(c){ return c.id !== id; });
+    render();
+    renderPersonnel();
+  }
+
+  function renderBanner(){
+    if(state.dbMode === 'offline'){
+      if(state.usingCachedCerts || state.usingCachedPersonnel || state.usingCachedAnnouncements){
+        els.banner.innerHTML = '<div class="banner"><b>離線預覽模式：</b>目前無法連線至雲端資料庫，以下為最近一次連線成功時同步的公司資料（可能非最新），新增／編輯僅暫存於本次瀏覽並不會上傳，請重新整理頁面以嘗試重新連線取得最新資料。</div>';
+      } else {
+        els.banner.innerHTML = '<div class="banner"><b>離線預覽模式：</b>目前無法連線至雲端資料庫，以下為示範資料，所有新增／編輯僅暫存於本次瀏覽，重新整理後不會保留。</div>';
+      }
+    } else {
+      els.banner.innerHTML = '';
+    }
+  }
+
+  var SEED = [
+    {name:'王志成', title:'工地主任', certType:'施工架組配作業主管安全衛生教育訓練', issueDate:'2023-08-20', expiryDate:'2026-08-20', notes:'範例資料'},
+    {name:'陳建宏', title:'工安管理員', certType:'缺氧作業主管安全衛生教育訓練', issueDate:'2023-09-25', expiryDate:'2026-09-25', notes:'範例資料'},
+    {name:'李美玲', title:'採購專員', certType:'甲種職業安全衛生業務主管', issueDate:'2022-10-15', expiryDate:'2026-10-15', notes:'範例資料'},
+    {name:'張文彬', title:'機電工程師', certType:'甲級電匠執照回訓', issueDate:'2020-11-30', expiryDate:'2026-11-30', notes:'範例資料'},
+    {name:'林俊傑', title:'工地主任', certType:'施工架組配作業人員安全衛生教育訓練', issueDate:'2024-03-01', expiryDate:'2027-03-01', notes:'範例資料'},
+    {name:'黃淑芬', title:'品管工程師', certType:'特定化學物質作業主管安全衛生教育訓練', issueDate:'2024-06-10', expiryDate:'2027-06-10', notes:'範例資料'}
+  ];
+
+  function useSeedFallback(){
+    var cached = safeCacheGet(CACHE_KEY_CERTS);
+    if(cached){
+      state.certs = cached;
+      state.usingCachedCerts = true;
+    } else {
+      state.certs = SEED.map(function(c, i){ return Object.assign({id:'seed-'+i}, c); });
+      state.usingCachedCerts = false;
+    }
+    state.loading = false;
+    render();
+    renderPersonnel();
+  }
+
+  function exportCsv(){
+    var rows = window._exportRows || [];
+    var header = ['姓名','職稱','證照／資格名稱','目前證照用於工地','發證日期','最近回訓日','到期日','狀態','備註／回訓報名狀態'];
+    var lines = [header.join(',')];
+    rows.forEach(function(c){
+      var line = [c.name, c.title||'', c.certType, effectiveUsedWorksite(c), fmtRocCompact(c.issueDate), fmtRocCompact(c.lastRetrainDate), fmtRocCompact(c.expiryDate),
+        STATUS_TEXT[c.status], c.notes||'']
+        .map(function(v){ v = String(v==null?'':v); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; })
+        .join(',');
+      lines.push(line);
+    });
+    var csv = '﻿' + lines.join('\r\n');
+    if(!downloadsApi){ return; }
+    downloadsApi.save({ filename: '證照到期清單_' + fmtDate(today) + '.csv', data: csv }).catch(function(){ /* declined or unavailable */ });
+  }
+  els.exportBtn.addEventListener('click', exportCsv);
+
+  // ---------- init ----------
+
+  function init(){
+    render(); // shows skeleton immediately
+    renderPersonnel();
+
+    getFirebaseDb().then(function(dbNs){
+      if(!dbNs){
+        state.dbMode = 'offline';
+        useSeedFallback();
+        usePersonnelSeedFallback();
+        useAnnouncementsSeedFallback();
+        renderBanner();
+        syncAllCertsCachedInfo();
+        syncInactiveCertsCleanup();
+        reconcileCertPeopleWithPersonnel();
+        return;
+      }
+      db = dbNs;
+      state.dbMode = 'live';
+      renderBanner();
+      col = db.collection('certs');
+      col.onSnapshot(function(snap){
+        state.certs = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+        state.loading = false;
+        safeCacheSet(CACHE_KEY_CERTS, state.certs); // 快取這次成功同步的公司真實資料，供之後離線時使用
+        render();
+        renderPersonnel(); // 更新員工管理裡的證照張數計數
+        syncAllCertsCachedInfo(); // 確保已連結證照的姓名／職稱與員工管理最新資料一致
+        syncInactiveCertsCleanup(); // 確保離職員工的證照不會殘留（含舊資料）
+        reconcileCertPeopleWithPersonnel(); // 證照人員與員工管理名冊交叉比對，未有對應人員者自動建立外掛人員
+      }, function(err){
+        if(state.certs.length === 0){
+          state.dbMode = 'offline';
+          useSeedFallback();
+          usePersonnelSeedFallback();
+          useAnnouncementsSeedFallback();
+          renderBanner();
+          syncAllCertsCachedInfo();
+          syncInactiveCertsCleanup();
+          reconcileCertPeopleWithPersonnel();
+        }
+      });
+      personnelCol = db.collection('personnel');
+      personnelCol.onSnapshot(function(snap){
+        state.personnel = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+        state.personnelLoading = false;
+        safeCacheSet(CACHE_KEY_PERSONNEL, state.personnel); // 快取這次成功同步的公司真實資料，供之後離線時使用
+        renderPersonnel();
+        render(); // re-render cert table in case cached name/title should reflect newly-loaded links
+        syncAllCertsCachedInfo(); // 確保已連結證照的姓名／職稱與員工管理最新資料一致
+        syncInactiveCertsCleanup(); // 確保離職員工的證照不會殘留（含舊資料）
+        reconcileCertPeopleWithPersonnel(); // 證照人員與員工管理名冊交叉比對，未有對應人員者自動建立外掛人員
+      }, function(err){
+        if(state.personnel.length === 0){
+          state.personnelLoading = false;
+          renderPersonnel();
+        }
+      });
+      announcementsCol = db.collection('announcements');
+      announcementsCol.onSnapshot(function(snap){
+        state.announcements = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+        state.announcementsLoading = false;
+        safeCacheSet(CACHE_KEY_ANNOUNCEMENTS, state.announcements); // 快取這次成功同步的公司真實資料，供之後離線時使用
+        renderAnnouncements();
+      }, function(err){
+        if(state.announcements.length === 0){
+          state.announcementsLoading = false;
+          renderAnnouncements();
+        }
+      });
+    }).catch(function(){
+      state.dbMode = 'offline';
+      useSeedFallback();
+      usePersonnelSeedFallback();
+      useAnnouncementsSeedFallback();
+      renderBanner();
+      syncAllCertsCachedInfo();
+      syncInactiveCertsCleanup();
+      reconcileCertPeopleWithPersonnel();
+    });
+
+    // 瀏覽器原生下載（取代 Claude 平台的 downloads 能力）：把 CSV 內容轉成檔案，觸發瀏覽器下載。
+    downloadsApi = {
+      save: function(opts){
+        return new Promise(function(resolve, reject){
+          try{
+            var blob = new Blob([opts.data], {type:'text/csv;charset=utf-8;'});
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = opts.filename || 'export.csv';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+            resolve();
+          }catch(e){ reject(e); }
+        });
+      }
+    };
+    els.exportBtn.hidden = false;
+    els.personnelExportBtn.hidden = false;
+  }
+
+  // ================= Firebase 登入頁邏輯（在 state／els／init 都已就緒後才執行） =================
+  function showAuthGate(show){
+    document.getElementById('authGate').hidden = !show;
+    document.getElementById('appRoot').hidden = show;
+  }
+
+  var appBooted = false;
+  function bootAppOnce(){
+    if(appBooted) return;
+    appBooted = true;
+    init();
+  }
+
+  if(firebaseReady){
+    var auth = firebase.auth();
+    var authEmailEl = document.getElementById('authEmail');
+    var authPasswordEl = document.getElementById('authPassword');
+    var authErrorEl = document.getElementById('authError');
+    var authLoginBtn = document.getElementById('authLoginBtn');
+
+    function doLogin(){
+      var email = authEmailEl.value.trim();
+      var pw = authPasswordEl.value;
+      authErrorEl.style.display = 'none';
+      if(!email || !pw){
+        authErrorEl.textContent = '請輸入帳號與密碼。';
+        authErrorEl.style.display = 'block';
+        return;
+      }
+      authLoginBtn.disabled = true;
+      auth.signInWithEmailAndPassword(email, pw).catch(function(err){
+        authErrorEl.textContent = '登入失敗：帳號或密碼錯誤，請確認後再試一次。';
+        authErrorEl.style.display = 'block';
+      }).then(function(){
+        authLoginBtn.disabled = false;
+      });
+    }
+    authLoginBtn.addEventListener('click', doLogin);
+    authPasswordEl.addEventListener('keydown', function(e){ if(e.key === 'Enter') doLogin(); });
+    authEmailEl.addEventListener('keydown', function(e){ if(e.key === 'Enter') doLogin(); });
+
+    auth.onAuthStateChanged(function(user){
+      if(user){
+        showAuthGate(false);
+        bootAppOnce();
+      } else {
+        showAuthGate(true);
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', function(){ firebase.auth().signOut(); });
+  } else {
+    // 尚未設定 Firebase（或設定有誤）：略過登入頁，直接以離線示範模式顯示，方便您先確認畫面長相。
+    showAuthGate(false);
+    bootAppOnce();
+    document.getElementById('logoutBtn').style.display = 'none';
+  }
+  // ================================================================
+
+  // periodic re-render so "days remaining" stays correct if the page is left open
+  setInterval(function(){
+    var t = new Date(); t.setHours(0,0,0,0);
+    if(t.getTime() !== today.getTime()){
+      today = t;
+      els.todayLabel.textContent = fmtRocFull(fmtDate(today)) + '（' + ['日','一','二','三','四','五','六'][today.getDay()] + '）';
+    }
+    render();
+    renderPersonnel();
+  }, 5 * 60 * 1000);
+
+})();
+</script>
+
+</body>
+</html>
