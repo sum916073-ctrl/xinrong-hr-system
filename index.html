@@ -152,6 +152,10 @@
     border:1px solid var(--line);border-radius:14px;
     padding:24px 28px;box-shadow:var(--shadow);
   }
+  /* 標頭右側：日期＋操作按鈕群組，整組一起靠右對齊、統一間距，避免各元件各自散開、擁擠貼在一起。 */
+  .header-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .header-actions-btns{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .header-divider{width:1px;height:22px;background:var(--line);margin:0 2px;flex:none;}
   .brand{display:flex;align-items:center;gap:16px;}
   .brand-logo{width:56px;height:auto;flex:none;filter:drop-shadow(0 2px 4px rgba(20,30,45,.15));}
   header.top h1{
@@ -604,8 +608,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
-  // ★★★ 請把下面這組換成您自己 Firebase 專案「專案設定 → 一般 → 您的應用程式」頁面裡的設定值 ★★★
-  // 尚未填入正確設定前，系統會自動以「離線示範模式」顯示（不會出錯、不會卡住），方便您先確認畫面。
+  // Leo 的 xinrong-hr Firebase 專案設定（使用者已提供並固定寫入，之後重新產生本檔案時會自動帶入，不需再手動貼上）
   var firebaseConfig = {
     apiKey: "AIzaSyBYIv8MeOj3-LkVhWmOyBD9zLYBzFXW_dk",
     authDomain: "xinrong-hr.firebaseapp.com",
@@ -646,11 +649,16 @@
         <h1><span class="brand-name">信榮營造</span><span class="brand-divider">｜</span><span class="brand-suffix">人事管理系統</span></h1>
       </div>
     </div>
-    <div class="today-chip">今日日期　<b id="todayLabel">—</b></div>
-    <button type="button" id="logoutBtn" class="btn ghost small" style="margin-left:4px;">登出</button>
-    <button type="button" id="migrateImportBtn" class="btn ghost small" style="margin-left:4px;" title="把從舊系統匯出的搬家資料 JSON 檔案匯入這個新資料庫（只需要做一次）">匯入搬家資料</button>
-    <input type="file" id="migrateImportInput" accept="application/json,.json" hidden />
-    <button type="button" class="btn ghost small" id="migrateExportBtn" style="margin-left:4px;" hidden title="把目前所有員工、證照、公告資料匯出成一個檔案，用於搬到新系統時匯入">搬家用：匯出全部資料</button>
+    <div class="header-actions">
+      <div class="today-chip">今日日期　<b id="todayLabel">—</b></div>
+      <div class="header-actions-btns">
+        <button type="button" class="btn ghost small" id="migrateExportBtn" hidden title="把目前所有員工、證照、公告資料匯出成一個檔案，用於搬到新系統時匯入">📤 匯出搬家資料</button>
+        <button type="button" id="migrateImportBtn" class="btn ghost small" title="把從舊系統匯出的搬家資料 JSON 檔案匯入這個新資料庫（只需要做一次）">📥 匯入搬家資料</button>
+        <input type="file" id="migrateImportInput" accept="application/json,.json" hidden />
+        <span class="header-divider" aria-hidden="true"></span>
+        <button type="button" id="logoutBtn" class="btn ghost small">🚪 登出</button>
+      </div>
+    </div>
   </header>
 
   <div id="banner"></div>
