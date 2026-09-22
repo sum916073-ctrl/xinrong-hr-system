@@ -607,12 +607,12 @@
   // ★★★ 請把下面這組換成您自己 Firebase 專案「專案設定 → 一般 → 您的應用程式」頁面裡的設定值 ★★★
   // 尚未填入正確設定前，系統會自動以「離線示範模式」顯示（不會出錯、不會卡住），方便您先確認畫面。
   var firebaseConfig = {
-    apiKey: "AIzaSyBYIv8MeOj3-LkVhWmOyBD9zLYBzFXW_dk",
-    authDomain: "xinrong-hr.firebaseapp.com",
-    projectId: "xinrong-hr",
-    storageBucket: "xinrong-hr.firebasestorage.app",
-    messagingSenderId: "772057950058",
-    appId: "1:772057950058:web:ad75d4e0514e6141ab6713"
+    apiKey: "請貼上您的 apiKey",
+    authDomain: "請貼上您的 authDomain",
+    projectId: "請貼上您的 projectId",
+    storageBucket: "請貼上您的 storageBucket",
+    messagingSenderId: "請貼上您的 messagingSenderId",
+    appId: "請貼上您的 appId"
   };
 </script>
 </head>
@@ -648,6 +648,9 @@
     </div>
     <div class="today-chip">今日日期　<b id="todayLabel">—</b></div>
     <button type="button" id="logoutBtn" class="btn ghost small" style="margin-left:4px;">登出</button>
+    <button type="button" id="migrateImportBtn" class="btn ghost small" style="margin-left:4px;" title="把從舊系統匯出的搬家資料 JSON 檔案匯入這個新資料庫（只需要做一次）">匯入搬家資料</button>
+    <input type="file" id="migrateImportInput" accept="application/json,.json" hidden />
+    <button type="button" class="btn ghost small" id="migrateExportBtn" style="margin-left:4px;" hidden title="把目前所有員工、證照、公告資料匯出成一個檔案，用於搬到新系統時匯入">搬家用：匯出全部資料</button>
   </header>
 
   <div id="banner"></div>
@@ -1234,6 +1237,7 @@
     search: document.getElementById('search'),
     clearBtn: document.getElementById('clearBtn'),
     exportBtn: document.getElementById('exportBtn'),
+    migrateExportBtn: document.getElementById('migrateExportBtn'),
     addBtn: document.getElementById('addBtn'),
     overlay: document.getElementById('overlay'),
     modalTitle: document.getElementById('modalTitle'),
@@ -3455,6 +3459,21 @@
   }
   els.exportBtn.addEventListener('click', exportCsv);
 
+  // 搬家用：把目前資料庫裡「原始」的員工／證照／公告資料，原封不動輸出成 JSON，
+  // 供新系統（例如換成自己 Firebase 資料庫後）匯入，避免手動重新輸入。
+  function exportMigrationData(){
+    if(!downloadsApi){ return; }
+    var payload = {
+      exportedAt: new Date().toISOString(),
+      certs: state.certs || [],
+      personnel: state.personnel || [],
+      announcements: state.announcements || []
+    };
+    var json = JSON.stringify(payload, null, 2);
+    downloadsApi.save({ filename: '人事系統搬家資料_' + fmtDate(today) + '.json', data: json }).catch(function(){ /* declined or unavailable */ });
+  }
+  els.migrateExportBtn.addEventListener('click', exportMigrationData);
+
   // ---------- init ----------
 
   function init(){
@@ -3537,15 +3556,17 @@
       reconcileCertPeopleWithPersonnel();
     });
 
-    // 瀏覽器原生下載（取代 Claude 平台的 downloads 能力）：把 CSV 內容轉成檔案，觸發瀏覽器下載。
+    // 瀏覽器原生下載（取代 Claude 平台的 downloads 能力）：把內容轉成檔案，觸發瀏覽器下載。
     downloadsApi = {
       save: function(opts){
         return new Promise(function(resolve, reject){
           try{
-            var blob = new Blob([opts.data], {type:'text/csv;charset=utf-8;'});
+            var fname = opts.filename || 'export.csv';
+            var mime = /\.json$/i.test(fname) ? 'application/json;charset=utf-8;' : 'text/csv;charset=utf-8;';
+            var blob = new Blob([opts.data], {type:mime});
             var url = URL.createObjectURL(blob);
             var a = document.createElement('a');
-            a.href = url; a.download = opts.filename || 'export.csv';
+            a.href = url; a.download = fname;
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
             resolve();
@@ -3555,6 +3576,7 @@
     };
     els.exportBtn.hidden = false;
     els.personnelExportBtn.hidden = false;
+    els.migrateExportBtn.hidden = false;
   }
 
   // ================= Firebase 登入頁邏輯（在 state／els／init 都已就緒後才執行） =================
@@ -3598,6 +3620,49 @@
     authPasswordEl.addEventListener('keydown', function(e){ if(e.key === 'Enter') doLogin(); });
     authEmailEl.addEventListener('keydown', function(e){ if(e.key === 'Enter') doLogin(); });
 
+    // ---- 搬家資料匯入：把舊系統匯出的 JSON（員工／證照／公告）寫進這個新的 Firestore 資料庫 ----
+    var migrateImportBtn = document.getElementById('migrateImportBtn');
+    var migrateImportInput = document.getElementById('migrateImportInput');
+    function stripId(o){
+      var copy = {};
+      for(var k in o){ if(o.hasOwnProperty(k) && k !== 'id'){ copy[k] = o[k]; } }
+      return copy;
+    }
+    function migrateImportFile(file){
+      var reader = new FileReader();
+      reader.onload = function(){
+        var payload;
+        try{ payload = JSON.parse(reader.result); }
+        catch(e){ alert('檔案格式錯誤，請確認選擇的是搬家用的 JSON 檔案。'); return; }
+        var certsData = payload.certs || [];
+        var personnelData = payload.personnel || [];
+        var announcementsData = payload.announcements || [];
+        var total = certsData.length + personnelData.length + announcementsData.length;
+        if(total === 0){ alert('這個檔案裡沒有資料可以匯入。'); return; }
+        var ok = confirm('即將匯入：\n員工 ' + personnelData.length + ' 筆\n證照 ' + certsData.length + ' 筆\n公告 ' + announcementsData.length + ' 筆\n\n這個動作只需要做一次，如果之前已經匯入過，請勿重複匯入，以免造成重複資料。\n\n確定要繼續嗎？');
+        if(!ok) return;
+        if(!db){ alert('資料庫尚未連線，請稍等幾秒再試一次。'); return; }
+        var tasks = [];
+        personnelData.forEach(function(p){ tasks.push(db.collection('personnel').add(stripId(p))); });
+        certsData.forEach(function(c){ tasks.push(db.collection('certs').add(stripId(c))); });
+        announcementsData.forEach(function(a){ tasks.push(db.collection('announcements').add(stripId(a))); });
+        Promise.all(tasks).then(function(){
+          alert('匯入完成！共匯入 ' + total + ' 筆資料。');
+        }).catch(function(err){
+          alert('匯入過程中發生錯誤，部分資料可能未完成匯入：' + (err && err.message ? err.message : err));
+        });
+      };
+      reader.onerror = function(){ alert('讀取檔案失敗，請再試一次。'); };
+      reader.readAsText(file, 'utf-8');
+    }
+    migrateImportBtn.addEventListener('click', function(){ migrateImportInput.click(); });
+    migrateImportInput.addEventListener('change', function(){
+      if(migrateImportInput.files && migrateImportInput.files[0]){
+        migrateImportFile(migrateImportInput.files[0]);
+      }
+      migrateImportInput.value = '';
+    });
+
     auth.onAuthStateChanged(function(user){
       if(user){
         showAuthGate(false);
@@ -3613,6 +3678,7 @@
     showAuthGate(false);
     bootAppOnce();
     document.getElementById('logoutBtn').style.display = 'none';
+    document.getElementById('migrateImportBtn').style.display = 'none';
   }
   // ================================================================
 
